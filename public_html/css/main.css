@@ -1,0 +1,233 @@
+@font-face {
+    font-family: phetsarath;
+    src: url("fonts/Phetsarath OT.ttf");
+}
+
+@font-face {
+    font-family: roboto;
+    src: url("fonts/Roboto-Bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: droboto;
+    src: url("fonts/Roboto-Light.ttf") format("truetype");
+}
+@font-face {
+    font-family: hakban;
+    src: url("fonts/Allsmile Sans Hakbankerd.otf") format("truetype");
+}
+
+@font-face {
+    font-family: phetsarathbold;
+    src: url("fonts/Phetsarath OT.ttf");
+}
+
+@font-face {
+    font-family: "noto_serif_laoregular";
+    src: url("fonts/notoseriflao-regular-webfont.woff2") format("woff2"),
+        url("fonts/notoseriflao-regular-webfont.woff") format("woff"),
+        url("fonts/notoseriflao-regular-webfont.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "noto_serif_laobold";
+    src: url("fonts/notoseriflao-bold-webfont.woff2") format("woff2"),
+        url("fonts/notoseriflao-bold-webfont.woff") format("woff"),
+        url("fonts/notoseriflao-bold-webfont.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+body{
+    font-family: noto_serif_laoregular,Arial;
+}
+div
+{
+    font-family: noto_serif_laoregular,Arial;
+    
+}
+
+a
+{
+    text-decoration: none!important;
+}
+
+a{
+
+}
+
+.noto {
+    font-family: "noto_serif_laoregular";
+}
+
+.notob {
+    font-family: "noto_serif_laobold";
+}
+
+noto {
+    font-family: "noto_serif_laoregular";
+}
+
+notob {
+    font-family: "noto_serif_laobold";
+}
+.laos {
+    font-family: noto_serif_laoregular,Arial;
+    font-weight:normal!important;
+}
+
+.laob {
+    font-family: noto_serif_laoregular,Arial;
+    font-weight:normal!important;
+
+}
+
+
+.laosphet {
+    font-family: phetsarath,roboto!important;
+}
+
+.laophetb {
+    font-family: phetsarathbold,roboto!important;
+    
+}
+
+laob {
+    font-family: phetsarathbold,roboto;
+    font-weight:normal;
+}
+
+laos {
+    font-family: Arial, phetsarath, sans-serif;
+    font-weight:normal;
+
+}
+
+.robo {
+    font-family: roboto, Arial, sans-serif;
+}
+
+.drobo {
+    font-family: droboto, Arial, sans-serif;
+}
+
+robo {
+    font-family: roboto, Arial, sans-serif;
+}
+
+drobo {
+    font-family: droboto, Arial, sans-serif;
+}
+
+hakban {
+    font-family: hakban;
+}
+
+::selection {
+    background: yellow; /* WebKit/Blink Browsers */
+}
+::-moz-selection {
+    background: yellow; /* Gecko Browsers */
+}
+
+.mynum {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+}
+mynum {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+}
+
+.mynum-pink {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+    color: #e83e8c;
+    word-break: break-word;
+}
+mynum-pink {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+    color: #e83e8c;
+    word-break: break-word;
+}
+@media print {
+    @page {
+        margin: 0;
+    }
+    body {
+        margin-top: 1.6cm;
+        margin-bottom: 1.6cm;
+    }
+}
+
+.badge-dark {
+    color: #ffffff;
+    background-color: #343a40;
+    border-radius: 9px;
+    min-width: 18px;
+    height: 18px;
+    text-align: center;
+    padding: 3px 5px;
+}
+
+.dumpx
+{
+    color:#dd02fa;
+} 
+
+.nopadding, .nopadding  tbody tr td,.nopadding  tbody tr
+{
+    padding:0px!important; 
+}
+
+
+
+
+tbody
+        {
+            font-weight:normal;
+            font-size:15px;
+        }
+        table thead tr td 
+        {
+            font-weight:normal;
+            font-size:15px!important;
+        }
+
+        table thead tr th
+        {
+            font-weight:normal;
+            font-size:15px!important;
+        }
+        .dataTables_length 
+        select 
+        {
+            width:70px;
+            border-radius:3px;
+        }
+
+        a
+        {
+            text-decoration:none;
+        }
+
+        .dataTables_length
+        label, .previous,.next,.paginate_button
+        {
+            font-weight:normal;
+            font-size:15px!important;
+        }
+
+        #table_data_display_paginate  span a 
+        { 
+            border-radius:4px;
+            height:43px;
+            background: white!important;
+        }
+        
+        .btn-dark
+        {
+            background:#176cc1!important;
+        }
