@@ -1,0 +1,218 @@
+Project handoff notes - 2026-08-07
+
+Purpose:
+- This file is a quick context handoff for the next chat/session.
+- Detailed workflow rules are in `resources/prompts-hub/workflow.txt`.
+- Earlier task/user-task prompt logs are in `resources/prompts-hub/prompts.txt`.
+
+Main areas worked on:
+- `task/dashboard`
+- `user-task/dashboard`
+- user-task workflow actions for roles 2, 3, 4, 5
+- print/seeprint preview experiment
+- `is_admin = 1` normal company/user submission workflow notes
+
+is_admin = 1 workflow notes:
+- Full reference was added in `resources/prompts-hub/is-admin-1-workflow.txt`.
+- Lovable design brief was added in `resources/prompts-hub/lovable-is-admin-1-design-brief.txt`.
+- Static Lovable-style HTML preview was added at `public/permitflow-preview/index.html` and mirrored to served public path `public_html/permitflow-preview/index.html`.
+- Normal Laravel `/dashboard` redirects `is_admin = 1` to route `Enter` (`GET /enter/`).
+- Main controller/view are `app/Http/Controllers/EnterController.php` and `resources/views/allow/enter/index.blade.php`.
+- This flow creates company/user vehicle permit documents: parent `beta_enter`, child `beta_enter_detail`, optional `beta_enter_file`.
+- New submit starts at `WAITING`; draft starts at `DRAFT`.
+- `is_admin = 1` can send drafts to `WAITING`, edit only `DRAFT` or `CANCEL`, and cancel only `WAITING`.
+- `/user-task/login` blocks `is_admin = 1`; that dashboard is for processing roles, not document creation.
+
+Task dashboard current notes:
+- Main view: `resources/views/task/dashboard.blade.php`.
+- Data endpoint/controller: `app/Http/Controllers/TaskController.php`.
+- `/task/dashboard/data` has pagination at 40 parent entries per page.
+- Backend was optimized so the parent listing query starts from `beta_enter`.
+- `beta_enter_detail` is joined only when loading details for selected page entry IDs or when detail filters are used.
+- 2025 target-limited logic still exists in `TaskController`.
+- Target-limited applies only when `date_from` starts with `2025` and `daily_vehicle_statistics` exists for selected 2025 dates.
+- For target-limited dates, selected `enter_detail_id` rows come from `VehicleDetailSelectionService`.
+- For missing 2025 stats and 2026+ dates, normal rows are kept.
+- Date validation was added so invalid browser date values should not silently fall back to today.
+- Auto reload checkbox state is remembered and resets daily.
+- Sidebar/navbar was made fixed/collapsible and desktop table area scrolls separately.
+
+User-task dashboard current notes:
+- Login/dashboard routes are in `routes/web.php`.
+- Controller: `app/Http/Controllers/UserTaskController.php`.
+- Auth middleware: `app/Http/Middleware/UserTaskAuth.php`.
+- Dashboard Blade: `resources/views/user-task/dashboard.blade.php`.
+- Login uses `users.email` as login ID and Laravel Hash password check.
+- `is_admin = 1` cannot login to user-task dashboard.
+- `user-task.auth` refreshes `users.is_admin` from database on authenticated requests so manual role switching can be tested without logout.
+- User-task data is regular filtering only: no road permission, no `take_visible`, no `daily_vehicle_statistics`, no target-limited behavior.
+- User-task data endpoint uses 20 parent documents per page.
+- User-task parent query starts from `beta_enter`; `beta_enter_detail` is joined only for selected page details or detail filters.
+- User-task dashboard has fixed/collapsible sidebar, fixed top controls, scroll-only table panel, sticky header, and bottom pagination.
+- User-task auto reload checkbox remembers state, resets daily, and pagination/pointing popup save unchecked state.
+
+User-task workflow summary:
+- Main flow: WAITING -> POINTING -> SIGNING -> SIGNED -> READY -> SUCCESS.
+- Database stores UI label `SIGNED` as `SIGNINED`.
+- Role 2 sees WAITING, POINTING, READY, SUCCESS.
+- Role 3 sees POINTING, SIGNING, SIGNINED, READY.
+- Role 4 sees SIGNING, SIGNINED, READY, SUCCESS.
+- Role 5 sees all workflow statuses.
+- Role 3 and 5 use the pointing popup for POINTING -> SIGNING.
+- Role 3 and 5 now have `send_ready` for SIGNINED -> READY.
+- Role 3 and 5 have print button for printable statuses:
+  - Role 3: SIGNINED, READY.
+  - Role 5: SIGNINED, READY, SUCCESS.
+- Full current workflow details are in `resources/prompts-hub/workflow.txt`.
+
+User-task pointing popup:
+- Routes:
+  - `user-task.dashboard.pointing`
+  - `user-task.dashboard.subjects`
+- Production reminder: if Blade says `Route [user-task.dashboard.pointing] not defined`, production routes are stale or missing. Upload `routes/web.php` and clear route/view/cache.
+- Popup loads `beta_main_road`, `beta_road_select`, and company subjects.
+- Submit writes `beta_enter_road_detail`, `beta_enter.main_road_id`, `beta_enter.feed_back_msg`, then changes status to SIGNING.
+
+Print / seeprint notes:
+- Original print route:
+  - `GET /see/enter/print/{id}`
+  - route name `seePrint`
+  - controller `ReportController@print`
+  - middleware `checknormal`
+- Original core print Blade:
+  - `resources/views/notallow/see/print.blade.php`
+  - Wrapped in `<x-app-layout>`.
+  - The `.seeprint` block is the important/core print layout.
+  - Do not change its size, position, CSS, or print behavior unless explicitly requested.
+- `<x-app-layout>` pulls in:
+  - `mix('css/app.css')`
+  - `asset('css/main.css')`
+  - Bootstrap 5.1.1 CSS/JS
+  - `mix('js/app.js')`
+  - Livewire navigation/menu
+  - body class `font-sans antialiased`
+- These shared assets may affect original print styles, especially `.table`, `.btn`, `.text-center`, body font, global link styles, and Bootstrap/Tailwind resets.
+
+Seeprint preview current state:
+- A separate pure Blade preview was created for testing without `<x-app-layout>`.
+- Route:
+  - `GET /seeprint-preview/{id}`
+  - route name `seeprint.preview`
+  - middleware `user-task.auth`
+- Controller:
+  - `app/Http/Controllers/SeePrintPreviewController.php`
+- Blade:
+  - `resources/views/seeprint-preview/show.blade.php`
+- This preview copies the original print content without `<x-app-layout>`.
+- It auto-opens print after 3 seconds.
+- It uses user-task session auth and calls `Auth::onceUsingId()` so copied print Blade logic using `auth()->user()` still has a user.
+- Test URL requested by user: `/seeprint-preview/4`.
+
+Important caution:
+- There are temp files open in the IDE under `/private/var/folders/.../fz3temp-2/`.
+- Real project files are under `/Users/system64/Downloads/inout-system/inout-system`.
+- Prefer editing real workspace files, not temp copies.
+
+Validation commands used frequently:
+- `php -l app/Http/Controllers/TaskController.php`
+- `php -l app/Http/Controllers/UserTaskController.php`
+- `php -l app/Http/Controllers/ReportController.php`
+- `php -l app/Http/Controllers/SeePrintPreviewController.php`
+- `php artisan route:list --name=user-task`
+- `php artisan view:clear && php artisan view:cache`
+
+Rollback notes:
+- The user often asks to rollback recent changes. Only rollback the latest specific change, not unrelated work.
+- Never touch original `notallow.see.print` print layout unless the user explicitly says to edit it.
+
+Update notes - 2026-08-25
+
+Current active new/old permit split:
+- New frontend: `/new-enter`
+- New backend/task dashboard: `/new-user-task-v2/dashboard`
+- Old frontend: `/old-enter`
+- Old backend/task dashboard: `/old-user-task-v2/dashboard`
+- `new-enter` uses the `new_enters`, `new_enter_details`, `new_enter_files`, and `new_enter_road_details` tables.
+- `old-enter` keeps using the old `beta_enter`, `beta_enter_detail`, `beta_enter_file`, and `beta_enter_road_detail` tables.
+- The old/new frontend pages share the `resources/views/new-enter/*` Blade layout with a route prefix.
+- The old/new v2 task pages share `resources/views/new-user-task-v2/dashboard.blade.php` with route/print prefixes passed from controllers.
+
+Important production copy list for the new/old split:
+- Routes: `routes/web.php`
+- Middleware registration: `app/Http/Kernel.php`
+- Middleware files:
+  - `app/Http/Middleware/NewEnterAuth.php`
+  - `app/Http/Middleware/OldEnterAuth.php`
+  - `app/Http/Middleware/NewUserTaskAuth.php`
+  - `app/Http/Middleware/OldUserTaskV2Auth.php`
+- Controllers:
+  - `app/Http/Controllers/NewEnterController.php`
+  - `app/Http/Controllers/OldEnterController.php`
+  - `app/Http/Controllers/NewUserTaskController.php`
+  - `app/Http/Controllers/NewUserTaskV2Controller.php`
+  - `app/Http/Controllers/OldUserTaskV2Controller.php`
+- Models:
+  - `app/Models/NewEnter.php`
+  - `app/Models/NewEnterDetail.php`
+  - `app/Models/NewEnterFile.php`
+  - `app/Models/beta_enter.php`
+- Views:
+  - `resources/views/new-enter/login.blade.php`
+  - `resources/views/new-enter/index.blade.php`
+  - `resources/views/new-enter/documents.blade.php`
+  - `resources/views/new-user-task/login.blade.php`
+  - `resources/views/new-user-task-v2/dashboard.blade.php`
+  - `resources/views/new-seeprint-preview/show.blade.php`
+  - `resources/views/old-seeprint-preview/show.blade.php`
+- Config/env for Discord notifications:
+  - `config/services.php`
+  - `.env` needs `DISCORD_NEW_ENTER_WEBHOOK_URL=...`
+
+Production gotchas found:
+- If production shows `Target class [old-enter.auth] does not exist`, `OldEnterAuth.php` or the `old-enter.auth` middleware alias in `app/Http/Kernel.php` is missing. Upload/register middleware and clear cache.
+- If production shows parse error around `fn (...) => ...`, the server PHP is older than local PHP. Arrow functions were removed from the copied new/old controllers and replaced with normal callbacks.
+- If old `/enter` save with upload fails with `Column 'enter_id' cannot be null`, the cause is `app/Models/beta_enter.php` now correctly sets `protected $primaryKey = 'enter_id'`, while old `EnterController` was still reading `$beta_enter->id`.
+- Production hotfix applied in `app/Http/Controllers/EnterController.php`: replace `$enter_id = $beta_enter->id;` with `$enter_id = $beta_enter->enter_id;` in the old `/enter` create and draft create paths.
+- This hotfix is intentionally narrow because old production is still active during migration. Do not refactor old `/enter`; touch only the broken path unless the user explicitly asks.
+
+V2 workflow permission update:
+- For both `/new-user-task-v2` and `/old-user-task-v2`, roles `is_admin = 2` and `3` must not pull back after signed.
+- Only roles `is_admin = 4` and `5` can pull back after signed.
+- Role 4 now has pull-back actions:
+  - `SIGNINED -> SIGNING`
+  - `READY -> SIGNINED`
+  - `SUCCESS -> READY`
+- Role 5 already had those pull-back actions.
+
+New/old signing mode update:
+- For `/new-user-task-v2` and `/old-user-task-v2`, role 4/5 dashboards include two sign mode buttons before the filter collapse button:
+  - `ເຊັນເອງ`
+  - `ເຊັນລະບົບ`
+- Default mode is system signing.
+- Sign mode is stored in session and should persist until logout.
+- Routes:
+  - `POST /new-user-task/dashboard/sign-mode`
+  - `POST /old-user-task-v2/dashboard/sign-mode`
+
+Quick test page:
+- URL: `/quick-enter-test`
+- It can create sample orders for `new_enters` and `beta_enter`.
+- It can update `users.id = 1` to `is_admin = 1, 2, 3, 4, 5`.
+- Open-page links use `_blank`.
+- This page is for development/testing only; avoid exposing it publicly in production unless protected.
+
+Database notes:
+- Direct SQL was provided for:
+  - `new_enters`
+  - `new_enter_details`
+  - `new_enter_files`
+  - `new_enter_road_details`
+- `new_enters` needs `take` and `feed_back_msg`.
+- `beta_enter` already has `take`; do not add new columns for old flow unless a real production schema check proves they are missing.
+
+Post-upload production commands:
+- Run after copying route/controller/view/config changes:
+  - `php artisan optimize:clear`
+  - `php artisan route:clear`
+  - `php artisan view:clear`
+  - `php artisan config:clear`

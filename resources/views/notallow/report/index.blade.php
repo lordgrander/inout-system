@@ -2,9 +2,7 @@
      
     <div class="py-1 laos">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                 
-
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg"> 
                 <div class="bg-gray-200 bg-opacity-25 grid grid-cols-1 md:grid-cols-1">
                     <div class="p-6">
                         <div class="flex items-center"> 
@@ -49,81 +47,7 @@
                         </div>
                     </div> 
                 </div>
- 
-                <!-- <div class="bg-gray-200 bg-opacity-25 grid grid-cols-1 md:grid-cols-1 mt-3">
-                    <div class="p-6">
-                        <div class="flex items-center"> 
-                            <div class="ml-4 text-lg text-gray-600 leading-7 font-semibold">
-                                <table>
-                                    <tr>
-                                        <td colspan="ເລືອກວັນທີເພື່ອລາຍງານ"></td>
-                                    </tr>
-                                    <tr>
-                                        <td> 
-                                            <input type="text" class="form-control" id="enter_number">
-                                        </td> 
-                                        <td> 
-                                            <button  class="btn btn-outline-dark search form-control">ຄົ້ນຫາເລກທີ່</button>
-                                        </td>
-                                    </tr>
-                                </table>
-                                
-                                
-                            </div>
-                        </div>
-
-                        <div class="ml-12">
-                            <div class="mt-2 text-sm text-gray-500">
-                            </div>
- 
-                        </div>
-                    </div> 
-                </div> -->
-
-                <!-- <div class="bg-gray-200 bg-opacity-25 grid grid-cols-1 md:grid-cols-1 mt-3">
-                    <div class="p-6">
-                        <div class="flex items-center"> 
-                            <div class="ml-4 text-lg text-gray-600 leading-7 font-semibold">
-                                <table>
-                                    <tr>
-                                        <td colspan="ເລືອກວັນທີເພື່ອລາຍງານ"></td>
-                                    </tr>
-                                    <tr>
-                                        <td> 
-                                            <input type="text" class="form-control" id="start_enter_number">
-                                        </td> 
-                                        <td> 
-                                            <input type="text" class="form-control" id="end_enter_number">
-                                        </td> 
-                                        <td> 
-                                            <button  class="btn btn-outline-dark search_enter_number form-control">ກອງເລກທີ່</button>
-                                        </td>
-                                    </tr>
-                                </table>
-                                <br>
-                                <table class="table table-bordered" id="table-data">
-                                    <thead>
-                                        <tr>
-                                            <th>ເລກທີ່</th>
-                                            <th>ວັນທີ</th>
-                                            <th>ເບີ່ງຂໍ້ມູນ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="build"></tbody>
-                                </table>
-                                
-                                
-                            </div>
-                        </div>
-
-                        <div class="ml-12">
-                            <div class="mt-2 text-sm text-gray-500">
-                            </div>
- 
-                        </div>
-                    </div> 
-                </div> -->
-
+  
                 
             </div>
         </div>
@@ -154,11 +78,29 @@
 
 
                 @if(auth()->user()->id=='805')
-                    window.location.href = ('/i/report/'+start+'/'+end+'');
+                    // window.location.href = ('/i/report/'+start+'/'+end+'');
+                    window.location.href = ('/reports/daily-vehicle-statistics/'+start+'/'+end+'');
+
+                @elseif(auth()->user()->id=='1')
+                    let endYear = parseInt(end.substring(0, 4), 10);
+
+                    if(endYear > 2025)
+                    { 
+                        window.location.href = ('/i/report/'+start+'/'+end+'');
+                    }
+                    else
+                    {
+                        window.location.href = ('/reports/daily-vehicle-statistics/'+start+'/'+end+'');
+                    }
+                    
+ 
                 @else
                     window.location.href = ('/report/'+start+'/'+end+'');
-                @endif            
+                @endif                      
             });
+
+
+            
 
             $('.total_i_vs_noi').on('click',function(){
                 let start = $('#start').val();

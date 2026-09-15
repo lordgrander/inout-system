@@ -1,0 +1,283 @@
+Lovable design brief - is_admin = 1 company submission UI
+Date: 2026-08-24
+
+Goal:
+Design a modern, production-ready UI/UX for the `is_admin = 1` company/user submission flow. This role creates and manages vehicle permit documents. The design should feel like a real operational tool: clear, fast, calm, and easy to use every day.
+
+Required visual style:
+- Use a professional white-background interface.
+- Main page background should be white or very light neutral, not colorful.
+- Main text should be black or near-black for readability.
+- Use dark blue as the primary brand/action color.
+- The exact dark blue can be chosen by the designer, but it should feel official, trustworthy, and professional.
+- Suggested primary dark blue range:
+  - `#0A3A6E`
+  - `#0A4E9B`
+  - `#083B75`
+  - `#102A43`
+- Use dark blue for main buttons, active states, important headings, and selected navigation.
+- Use neutral gray for secondary text, borders, inactive controls, table lines, and helper text.
+- Use status colors only where they carry meaning: green for success, red for cancel/error, amber for processing/warning, gray for draft.
+- Avoid playful, overly colorful, gradient-heavy, or marketing-style visuals.
+- The UI should look like a serious company/government-style workflow tool, but still clean and easy to use.
+
+Audience:
+- Company users who submit vehicle permit requests.
+- Users may submit several vehicles at once.
+- Users need to see drafts, today's submissions, cancelled documents, files, and status progress.
+
+Scope:
+Design only these two screens first:
+- New permit form: `EnterController@index`, current Laravel Blade `resources/views/allow/enter/index.blade.php`.
+- Document history/list: `EnterController@history`, currently renders `resources/views/allow/enter/list.blade.php`.
+
+Do not design or change:
+- Staff processing dashboard.
+- `/user-task` dashboard.
+- Print layouts.
+- Quota/quotar flows.
+- Insurance flow, unless only showing navbar context.
+
+Important app context:
+- `is_admin = 1` uses normal Laravel auth.
+- After login, `/dashboard` redirects this role to `/enter/`.
+- `/user-task/login` blocks `is_admin = 1`; this role is document creation, not document processing.
+- New submitted documents start at status `WAITING`.
+- Draft documents start at `DRAFT`.
+- The user can cancel only `WAITING`.
+- The user can edit only `DRAFT` or `CANCEL`.
+- Staff later moves documents through:
+  `WAITING -> POINTING -> SIGNING -> SIGNINED -> READY -> SUCCESS`.
+- Database stores signed as `SIGNINED`, but user-facing label should be `SIGNED` or Lao equivalent.
+
+Screen 1: New Permit Form
+Purpose:
+Let a company user create a vehicle permit request with one to five vehicle rows, destination details, optional note, and attached files.
+
+Primary layout:
+- Build the actual form as the first screen, not a landing page.
+- Use a focused two-panel layout on desktop:
+  - Left panel: vehicle input fields.
+  - Right panel: added vehicle list, destination, files, and submit actions.
+- On mobile, stack panels vertically.
+- Mobile responsive behavior is required, not optional.
+- Keep the page dense enough for daily work; avoid giant hero sections or decorative marketing cards.
+
+Vehicle input fields:
+- Plate number input.
+- Driver name input.
+- Weight input.
+- Vehicle type select.
+- Round/trip select, visible only when the selected vehicle type supports rounds.
+- Import product input.
+- Import document/reference number input.
+- Add vehicle button.
+
+Vehicle type behavior:
+- Vehicle type options come from `beta_t_type`.
+- Some vehicle types have `is_round = 1`.
+- If `is_round = 1`, show round/trip selector with values 1 to 5.
+- If not, hide/reset the round selector.
+
+Add vehicle row behavior:
+- Require these fields before adding a row:
+  - plate number
+  - driver name
+  - weight
+  - vehicle type
+  - import product
+  - import reference/detail
+- Allow max 5 active vehicle rows.
+- Show current count clearly, for example `2/5`.
+- Added vehicles should appear immediately in a review table or compact list.
+- Each row needs edit and delete actions.
+- Editing should be inline or in a small modal, but must feel safe and easy.
+
+Vehicle list columns:
+- Plate number.
+- Driver name.
+- Vehicle type.
+- Round/trip count if applicable.
+- Import product.
+- Weight.
+- Import reference/detail.
+- Actions.
+
+Destination section:
+- Village input.
+- District input.
+- Province input.
+- Optional special destination note.
+
+Files section:
+- Multiple file upload.
+- Accepted file concept: PDF, JPG, PNG.
+- Show selected files clearly before submit if possible.
+- The UI text should be careful because backend upload limits currently differ by method. Keep copy general, such as "Attach supporting files".
+
+Submit actions:
+- Save as draft.
+- Submit form.
+- Primary action should be submit.
+- Draft should be visually secondary.
+- Before submit/draft, require:
+  - at least one vehicle row
+  - village
+  - district
+  - province
+
+Loading/feedback:
+- Show a clear loading state when submitting.
+- Show success confirmation.
+- Show validation messages close to the relevant fields.
+- Avoid relying only on browser alert/confirm styling if designing from scratch.
+
+Screen 2: Document History/List
+Purpose:
+Let the company user monitor documents, continue drafts, cancel waiting documents, view details, download files, and inspect status.
+
+Primary layout:
+- Header with page title and company name.
+- Quick actions:
+  - Create new permit.
+  - Today's list.
+  - History.
+- Summary counts:
+  - Active/in progress.
+  - Draft.
+  - Cancelled.
+  - Files or attachments.
+- Main content should be a searchable, scannable document table.
+
+Table/list data:
+- Document number.
+- Status.
+- Date in.
+- Date out.
+- Destination.
+- Optional note/cancel reason.
+- Actions.
+- Files.
+
+Status presentation:
+- Use clear status chips, not raw text alone.
+- Suggested user-facing status map:
+  - `DRAFT`: Draft.
+  - `WAITING` or `QWAIT`: Waiting.
+  - `POINTING`: Route selection in progress.
+  - `SIGNING` or `QSIGNING`: Processing/signing.
+  - `SIGNINED`: Signed.
+  - `READY`: Ready / waiting handoff.
+  - `SUCCESS`: Complete.
+  - `CANCEL`: Cancelled.
+- Use restrained colors:
+  - Waiting: blue.
+  - Processing: amber.
+  - Ready: teal.
+  - Success: green.
+  - Cancelled: red.
+  - Draft: neutral gray.
+
+Actions by status:
+- `DRAFT`:
+  - Send document.
+  - Edit.
+  - Delete.
+- `WAITING`:
+  - View details.
+  - Cancel.
+- `CANCEL`:
+  - Edit.
+  - Delete.
+- Other active statuses:
+  - View details.
+  - Files/download when available.
+
+Files:
+- If files exist, show compact file buttons or attachment chips.
+- If no files, show a quiet dash or empty state.
+
+Search/filtering:
+- Include a simple search field for document number, destination, status, or text.
+- A status filter would be useful if designing beyond current behavior.
+- Keep table pagination simple and visible.
+
+Responsive behavior:
+- Desktop: table works well with horizontal density.
+- Mobile: use stacked cards or a horizontally scrollable table that remains usable.
+- Actions must not wrap into confusing layouts on small screens.
+- All inputs, selects, buttons, tables/cards, and file chips must fit on mobile widths.
+- Text must not overlap, overflow, or be hidden behind controls.
+- Primary actions should remain easy to tap on phones.
+- Use readable mobile font sizes and comfortable touch targets.
+
+Visual direction:
+- Operational, trustworthy, and calm.
+- Use white panels on a white or very light neutral background.
+- Use black or near-black text for primary content.
+- Use dark blue as the main brand color and primary action color.
+- Use 8px radius for cards, buttons, tables, and inputs.
+- Avoid oversized decorative hero sections.
+- Avoid dark, heavy, one-color themes.
+- Avoid purple/blue gradients and decorative blobs.
+- Avoid low-contrast pale text.
+- Make information hierarchy obvious:
+  - title
+  - summary
+  - input/review
+  - actions
+- Use consistent spacing and compact controls.
+
+Interaction principles:
+- The UI should reduce mistakes before submit.
+- The user should always know:
+  - how many vehicle rows they added
+  - what is required
+  - whether they are saving a draft or submitting
+  - what status each document is in
+  - what actions are available for each document
+
+Implementation compatibility notes for Laravel:
+- Preserve these important DOM IDs/classes if converting existing Blade:
+  - `#plate`
+  - `#d_name`
+  - `#weight`
+  - `#t_model`
+  - `#tell_round`
+  - `#p_import`
+  - `#detail`
+  - `#add`
+  - `#build`
+  - `#address`
+  - `#district`
+  - `#province`
+  - `#lasttails`
+  - `#upload_files`
+  - `#index`
+  - `#draft`
+  - `#save`
+  - `.send`
+  - `.cancel`
+  - `.delete`
+- Preserve existing POST endpoints unless backend is intentionally redesigned:
+  - `/enter/save`
+  - `/enter/draft`
+  - `/enter/send`
+  - `/enter/cancel`
+  - `/enter/delete`
+  - `/enter/update-session`
+- Existing data source variables:
+  - `$beta_t_type`
+  - `$user_list`
+  - `$beta_enter`
+  - `$beta_enter_cancel`
+  - `$beta_enter_draft`
+  - `$beta_enter_file`
+  - `$beta_enter_file_cancel`
+  - `$beta_enter_file_draft`
+  - `$com_name`
+
+Deliverable expectation:
+- Produce polished UI for both screens.
+- Include realistic empty states, loading states, validation states, and mobile behavior.
+- Keep the result ready to translate into Laravel Blade without changing backend behavior.

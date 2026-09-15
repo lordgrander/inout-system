@@ -46,6 +46,56 @@ class QuotarCon extends Controller
  
     }
 
+    public function exportProducts(Request $request)
+    {
+        $availableColumns = [
+            'id' => 'ID',
+            'name' => 'ລາຍການ',
+            'pro_type_id' => 'ລະຫັດປະເພດ',
+            'type_name' => 'ປະເພດ',
+        ];
+
+        $columns = $request->input('columns', array_keys($availableColumns));
+        $columns = array_values(array_intersect($columns, array_keys($availableColumns)));
+
+        if (empty($columns)) {
+            $columns = array_keys($availableColumns);
+        }
+
+        $products = DB::table('products as p')
+            ->leftJoin('typex as t', 't.id', '=', 'p.pro_type_id')
+            ->select([
+                'p.id',
+                'p.name',
+                'p.pro_type_id',
+                't.name as type_name',
+            ])
+            ->orderBy('t.name')
+            ->orderBy('p.name')
+            ->get();
+
+        $filename = 'products-' . date('d-m-Y') . '.csv';
+
+        return response()->streamDownload(function () use ($products, $columns, $availableColumns) {
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, array_map(function ($column) use ($availableColumns) {
+                return $availableColumns[$column];
+            }, $columns));
+
+            foreach ($products as $product) {
+                fputcsv($handle, array_map(function ($column) use ($product) {
+                    return $product->{$column};
+                }, $columns));
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     public function save(Request $request)
     { 
             $type_id = $request->type_id; 

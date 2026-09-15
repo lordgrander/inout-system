@@ -115,6 +115,34 @@
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-5">  
+                    <div class="p-4 border-bottom">
+                        <form action="{{ route('view.quotar.export') }}" method="GET">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <strong class="mr-3 mb-2">Export Excel:</strong>
+                                <label class="mr-3 mb-2">
+                                    <input type="checkbox" id="export_all_columns" checked>
+                                    ເລືອກທັງໝົດ
+                                </label>
+                                <label class="mr-3 mb-2">
+                                    <input type="checkbox" class="export-column" name="columns[]" value="id" checked>
+                                    ID
+                                </label>
+                                <label class="mr-3 mb-2">
+                                    <input type="checkbox" class="export-column" name="columns[]" value="name" checked>
+                                    ລາຍການ
+                                </label>
+                                <label class="mr-3 mb-2">
+                                    <input type="checkbox" class="export-column" name="columns[]" value="pro_type_id" checked>
+                                    ລະຫັດປະເພດ
+                                </label>
+                                <label class="mr-3 mb-2">
+                                    <input type="checkbox" class="export-column" name="columns[]" value="type_name" checked>
+                                    ປະເພດ
+                                </label>
+                                <button type="submit" class="btn btn-success mb-2">ດາວໂຫຼດ</button>
+                            </div>
+                        </form>
+                    </div>
                     <table class="table table-bordered">
 
                              <tr>
@@ -160,6 +188,13 @@
     });
 
     $(document).ready(function() {
+        $('#export_all_columns').on('change', function () {
+            $('.export-column').prop('checked', $(this).is(':checked'));
+        });
+
+        $('.export-column').on('change', function () {
+            $('#export_all_columns').prop('checked', $('.export-column:not(:checked)').length === 0);
+        });
 
         $('.btn_delete').on('click', function (e) {
             if(confirm('ລືບ?'))

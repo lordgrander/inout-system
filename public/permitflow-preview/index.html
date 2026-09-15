@@ -1,0 +1,1601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ຕົວຢ່າງໜ້າລະບົບຂໍອະນຸຍາດລົດ</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Lao:wght@400;500;600;700;800;900&display=swap");
+
+    :root {
+      --bg: #fbfcfe;
+      --card: #ffffff;
+      --text: #171c24;
+      --muted: #5f6b7a;
+      --line: #d7dee8;
+      --soft: #f5f7fa;
+      --primary: #0a427a;
+      --primary-2: #123f73;
+      --primary-soft: #e7f1ff;
+      --danger: #dc2626;
+      --danger-soft: #fee8e8;
+      --amber: #a16207;
+      --amber-soft: #fff4d7;
+      --teal: #0f766e;
+      --teal-soft: #dff7f3;
+      --green: #166534;
+      --green-soft: #e7f6ec;
+      --draft: #536071;
+      --draft-soft: #eef2f6;
+      --shadow: 0 1px 2px rgba(16, 24, 40, .08), 0 8px 24px rgba(16, 24, 40, .04);
+      font-family: Inter, "Noto Sans Lao", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .96);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 12px 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .brand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--primary);
+      color: #fff;
+      flex: 0 0 auto;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-sub {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .nav-link {
+      min-height: 40px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      font-weight: 600;
+    }
+
+    .nav-link:hover {
+      background: var(--soft);
+      color: var(--text);
+    }
+
+    .nav-link.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .menu-btn {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 61px;
+      left: 0;
+      right: 0;
+      z-index: 31;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 8px 18px 12px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--card);
+      box-shadow: 0 14px 30px rgba(16, 24, 40, .12);
+    }
+
+    .mobile-nav.open {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav-backdrop {
+      display: none;
+      position: fixed;
+      inset: 61px 0 0;
+      z-index: 30;
+      background: rgba(0, 0, 0, .2);
+    }
+
+    .nav-backdrop.open {
+      display: block;
+    }
+
+    .page-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(0, 0, 0, .2);
+    }
+
+    body.nav-open .page-backdrop {
+      display: block;
+    }
+
+    .main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 18px 34px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    @media (min-width: 981px) {
+      #page-new > .page-head {
+        display: none;
+      }
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--text);
+    }
+
+    .page-sub {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .counter {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 8px;
+      padding: 8px 12px;
+      min-width: 74px;
+      text-align: center;
+    }
+
+    .counter-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .counter-value {
+      font-size: 18px;
+      line-height: 1.1;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .grid-form {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel.sticky {
+      position: sticky;
+      top: 84px;
+    }
+
+    .panel-head {
+      min-height: 46px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field-grid.one {
+      grid-template-columns: 1fr;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid #cdd6e1;
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, .08);
+    }
+
+    .input,
+    .select {
+      height: 40px;
+      padding: 8px 12px;
+    }
+
+    .textarea {
+      min-height: 78px;
+      resize: vertical;
+      padding: 10px 12px;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(10, 66, 122, .13);
+    }
+
+    .hint,
+    .error {
+      margin: 6px 0 0;
+      font-size: 12px;
+    }
+
+    .hint {
+      color: var(--muted);
+    }
+
+    .error {
+      color: var(--danger);
+      font-weight: 600;
+      display: none;
+    }
+
+    .field.has-error .error {
+      display: block;
+    }
+
+    .field.has-error .input,
+    .field.has-error .select,
+    .field.has-error .textarea {
+      border-color: var(--danger);
+    }
+
+    .btn {
+      min-height: 40px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 650;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: .15s ease;
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: var(--primary-2);
+    }
+
+    .btn.secondary {
+      background: var(--card);
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    .btn.secondary:hover {
+      background: var(--soft);
+    }
+
+    .btn.danger {
+      background: var(--card);
+      border-color: var(--line);
+      color: var(--danger);
+    }
+
+    .btn.danger:hover {
+      background: var(--danger-soft);
+    }
+
+    .btn.small {
+      min-height: 32px;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .vehicle-actions {
+      margin-top: 18px;
+    }
+
+    .vehicle-actions .btn {
+      width: 100%;
+      min-height: 44px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .panel > .table-wrap {
+      border-left: 0;
+      border-right: 0;
+      border-bottom: 0;
+      border-radius: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      text-align: left;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .empty-table {
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, .08);
+    }
+
+    .icon-btn:hover {
+      background: var(--soft);
+    }
+
+    .icon-btn.danger {
+      color: var(--danger);
+    }
+
+    .section-gap {
+      display: grid;
+      gap: 20px;
+    }
+
+    .destination-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .dropzone {
+      border: 1px dashed #c9d4e2;
+      border-radius: 8px;
+      min-height: 118px;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      text-align: center;
+      background: #fcfdff;
+    }
+
+    .dropzone strong {
+      display: block;
+      margin-top: 8px;
+    }
+
+    .file-list {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .file-chip {
+      max-width: 190px;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 5px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .file-chip span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .submit-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .submit-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .notice {
+      margin-bottom: 18px;
+      border: 1px solid rgba(22, 101, 52, .25);
+      background: var(--green-soft);
+      color: var(--green);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    .notice.show {
+      display: flex;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      padding: 13px 16px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat-value {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .toolbar {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      margin-bottom: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar-head {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .segmented {
+      display: inline-flex;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 3px;
+      background: var(--card);
+    }
+
+    .segmented button,
+    .filter-row button {
+      border: 0;
+      background: transparent;
+      border-radius: 6px;
+      min-height: 32px;
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .segmented button.active,
+    .filter-row button.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .search {
+      position: relative;
+      min-width: 0;
+    }
+
+    .search svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    .search input {
+      padding-left: 38px;
+    }
+
+    .filter-row {
+      padding: 12px 16px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .filter-row button {
+      border: 1px solid var(--line);
+      min-height: 30px;
+      font-size: 12px;
+    }
+
+    .doc-table {
+      box-shadow: none;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-left: 0;
+      border-right: 0;
+      border-bottom: 0;
+    }
+
+    .doc-no {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .small-muted {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .status-chip:before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 99px;
+      background: currentColor;
+      flex: 0 0 auto;
+    }
+
+    .status-waiting { color: #1d5fa7; background: var(--primary-soft); border-color: rgba(29, 95, 167, .24); }
+    .status-processing { color: var(--amber); background: var(--amber-soft); border-color: rgba(161, 98, 7, .24); }
+    .status-ready { color: var(--teal); background: var(--teal-soft); border-color: rgba(15, 118, 110, .24); }
+    .status-success { color: var(--green); background: var(--green-soft); border-color: rgba(22, 101, 52, .24); }
+    .status-cancel { color: var(--danger); background: var(--danger-soft); border-color: rgba(220, 38, 38, .24); }
+    .status-draft { color: var(--draft); background: var(--draft-soft); border-color: rgba(83, 96, 113, .24); }
+
+    .doc-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      max-width: 260px;
+    }
+
+    .pagination {
+      border-top: 1px solid var(--line);
+      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .mobile-docs {
+      display: none;
+    }
+
+    .doc-card {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .doc-card-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .doc-dates {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .doc-card-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 44px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .empty-state.show {
+      display: block;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 980px) {
+      .desktop-nav { display: none; }
+      .menu-btn { display: inline-flex; }
+      .grid-form { grid-template-columns: 1fr; }
+      .panel.sticky { position: static; }
+      .destination-grid { grid-template-columns: 1fr; }
+      .submit-panel { align-items: stretch; flex-direction: column; }
+      .submit-buttons { width: 100%; display: grid; grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar-head { grid-template-columns: 1fr; }
+      .history-action { width: 100%; }
+      .desktop-docs { display: none; }
+      .mobile-docs { display: block; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar-inner { padding: 12px 16px; }
+      .main { padding: 18px 16px 34px; }
+      .page-head { grid-template-columns: minmax(0, 1fr) auto; }
+      .page-title { font-size: 21px; }
+      .page-sub { font-size: 14px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat { padding: 12px; }
+      .doc-card-head { grid-template-columns: minmax(0, 1fr); }
+      .doc-card-head .status-chip { justify-self: start; }
+      .doc-card-actions { justify-content: stretch; }
+      .doc-card-actions .btn { flex: 1; }
+      .pagination { grid-template-columns: 1fr; }
+      .pagination > div { justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
+              <path d="m9 12 2 2 4-5"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="brand-title">ລະບົບຂໍອະນຸຍາດລົດ</p>
+            <p class="brand-sub">ບໍລິສັດ ແມ່ນ້ຳຂອງ ໂລຈິສຕິກ</p>
+          </div>
+        </div>
+
+        <nav class="nav desktop-nav" aria-label="Primary">
+          <button class="nav-link active" data-page-target="new">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15h6"></path></svg>
+            ສ້າງໃບຂໍໃໝ່
+          </button>
+          <button class="nav-link" data-page-target="history">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path><path d="M12 7v5l4 2"></path></svg>
+            ເອກະສານ
+          </button>
+        </nav>
+
+        <button class="menu-btn" id="menuBtn" aria-label="Open navigation">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+        </button>
+      </div>
+      <nav class="mobile-nav" id="mobileNav" aria-label="Mobile primary">
+        <button class="nav-link active" data-page-target="new">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg>
+          ສ້າງໃບຂໍໃໝ່
+        </button>
+        <button class="nav-link" data-page-target="history">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path></svg>
+          ເອກະສານ
+        </button>
+      </nav>
+      <div class="nav-backdrop" id="navBackdrop"></div>
+    </header>
+    <div class="page-backdrop" id="pageBackdrop"></div>
+
+    <main class="main">
+      <section class="page active" id="page-new">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">ສ້າງຄຳຂໍອະນຸຍາດລົດໃໝ່</h1>
+            <p class="page-sub">ເພີ່ມລາຍການລົດ, ປາຍທາງ ແລະ ໄຟລ໌ແນບ ແລ້ວສົ່ງເພື່ອອະນຸມັດ.</p>
+          </div>
+          <div class="counter">
+            <div class="counter-label">ຈຳນວນລົດ</div>
+            <div class="counter-value"><span id="vehicleCountTop">0</span>/5</div>
+          </div>
+        </div>
+
+        <div class="notice" id="notice">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"></path><path d="m9 11 3 3L22 4"></path></svg>
+          <div>
+            <div id="noticeTitle">ສົ່ງຄຳຂໍສຳເລັດ</div>
+            <div class="small-muted" id="noticeText">ເອກະສານຖືກສ້າງດ້ວຍສະຖານະ ລໍຖ້າ.</div>
+          </div>
+        </div>
+
+        <div class="grid-form">
+          <section class="panel sticky">
+            <header class="panel-head">
+              <h2 class="panel-title">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-5l-3-5h-5v10h1"></path><circle cx="7.5" cy="17.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
+                <span id="vehiclePanelTitle">ຂໍ້ມູນລົດ</span>
+              </h2>
+              <button class="btn secondary small" id="cancelEditBtn" style="display:none">ຍົກເລີກການແກ້ໄຂ</button>
+            </header>
+            <div class="panel-body">
+              <div class="field-grid">
+                <div class="field" data-field="plate">
+                  <label for="plate">ທະບຽນລົດ</label>
+                  <input class="input" id="plate" placeholder="ຕົວຢ່າງ: 1234 VTE">
+                  <p class="error">ກະລຸນາລະບຸທະບຽນລົດ</p>
+                </div>
+                <div class="field" data-field="driver">
+                  <label for="driver">ຊື່ຜູ້ຂັບ</label>
+                  <input class="input" id="driver" placeholder="ຊື່ ແລະ ນາມສະກຸນ">
+                  <p class="error">ກະລຸນາລະບຸຊື່ຜູ້ຂັບ</p>
+                </div>
+                <div class="field" data-field="weight">
+                  <label for="weight">ນ້ຳໜັກ (ໂຕນ)</label>
+                  <input class="input" id="weight" inputmode="decimal" placeholder="ຕົວຢ່າງ: 12.5">
+                  <p class="error">ກະລຸນາລະບຸນ້ຳໜັກ</p>
+                </div>
+                <div class="field" data-field="type">
+                  <label for="vehicleType">ປະເພດລົດ</label>
+                  <select class="select" id="vehicleType">
+                    <option value="">ເລືອກປະເພດລົດ</option>
+                  </select>
+                  <p class="error">ກະລຸນາເລືອກປະເພດລົດ</p>
+                </div>
+                <div class="field" id="roundField" style="display:none">
+                  <label for="rounds">ຈຳນວນຖ້ຽວ</label>
+                  <select class="select" id="rounds">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                  <p class="hint">ປະເພດລົດນີ້ສາມາດລະບຸຈຳນວນຖ້ຽວໄດ້</p>
+                </div>
+                <div class="field" data-field="product">
+                  <label for="product">ສິນຄ້ານຳເຂົ້າ</label>
+                  <input class="input" id="product" placeholder="ຕົວຢ່າງ: ປູນຊີເມັນ">
+                  <p class="error">ກະລຸນາລະບຸສິນຄ້ານຳເຂົ້າ</p>
+                </div>
+                <div class="field full" data-field="reference">
+                  <label for="reference">ເລກທີເອກະສານນຳເຂົ້າ / ເລກອ້າງອີງ</label>
+                  <input class="input" id="reference" placeholder="ຕົວຢ່າງ: INV-2026-0187">
+                  <p class="hint">ເລກພາສີ ຫຼື ເລກໃບບິນ</p>
+                  <p class="error">ກະລຸນາລະບຸເລກອ້າງອີງ</p>
+                </div>
+              </div>
+              <div class="vehicle-actions">
+                <button class="btn primary" id="addVehicleBtn">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                  <span id="addVehicleText">ເພີ່ມລົດ</span>
+                </button>
+                <p class="error" id="rowLimitError">ເພີ່ມລົດໄດ້ສູງສຸດ 5 ຄັນ</p>
+              </div>
+            </div>
+          </section>
+
+          <div class="section-gap">
+            <section class="panel">
+              <header class="panel-head">
+                <h2 class="panel-title">ລາຍການລົດທີ່ເພີ່ມ</h2>
+                <div class="counter" style="padding:4px 9px; min-width:auto">
+                  <div class="counter-value" style="font-size:14px"><span id="vehicleCountPanel">0</span>/5</div>
+                </div>
+              </header>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ທະບຽນ</th>
+                      <th>ຜູ້ຂັບ</th>
+                      <th>ປະເພດ</th>
+                      <th>ຖ້ຽວ</th>
+                      <th>ສິນຄ້າ</th>
+                      <th>ນ້ຳໜັກ</th>
+                      <th>ເລກອ້າງອີງ</th>
+                      <th style="text-align:right">ຈັດການ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vehicleRows"></tbody>
+                </table>
+                <div class="empty-table" id="vehicleEmpty">ຍັງບໍ່ມີລາຍການລົດ</div>
+              </div>
+              <p class="error" id="rowsError" style="padding:0 16px 14px">Add at least one vehicle before continuing</p>
+            </section>
+
+            <section class="panel">
+              <header class="panel-head">
+                <h2 class="panel-title">ປາຍທາງ</h2>
+              </header>
+              <div class="panel-body">
+                <div class="destination-grid">
+                  <div class="field" data-field="village">
+                    <label for="village">ບ້ານ</label>
+                    <input class="input" id="village" placeholder="ບ້ານ">
+                    <p class="error">ກະລຸນາລະບຸບ້ານ</p>
+                  </div>
+                  <div class="field" data-field="district">
+                    <label for="district">ເມືອງ</label>
+                    <input class="input" id="district" placeholder="ເມືອງ">
+                    <p class="error">ກະລຸນາລະບຸເມືອງ</p>
+                  </div>
+                  <div class="field" data-field="province">
+                    <label for="province">ແຂວງ</label>
+                    <input class="input" id="province" placeholder="ແຂວງ">
+                    <p class="error">ກະລຸນາລະບຸແຂວງ</p>
+                  </div>
+                </div>
+                <div class="field" style="margin-top:16px">
+                  <label for="note">ໝາຍເຫດປາຍທາງພິເສດ (ຖ້າມີ)</label>
+                  <textarea class="textarea" id="note" placeholder="ຕົວຢ່າງ: ສົ່ງທີ່ສາງ B, ປະຕູ 2"></textarea>
+                  <p class="hint">ຂໍ້ມູນປະຕູ, ສາງ ຫຼື ຄຳແນະນຳການຈັດສົ່ງ</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <header class="panel-head">
+                <h2 class="panel-title">ແນບໄຟລ໌ປະກອບ</h2>
+              </header>
+              <div class="panel-body">
+                <label class="dropzone" for="files">
+                  <input id="files" type="file" multiple class="sr-only">
+                  <span>
+                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 17.2a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    <strong>ເລືອກໄຟລ໌ເພື່ອແນບ</strong>
+                    <span class="hint">PDF, JPG ຫຼື PNG</span>
+                  </span>
+                </label>
+                <div class="file-list" id="selectedFiles"></div>
+              </div>
+            </section>
+
+            <section class="submit-panel">
+              <p class="hint" style="margin:0">ການສົ່ງຄຳຂໍຈະສ້າງເອກະສານດ້ວຍສະຖານະ <strong style="color:var(--text)">ລໍຖ້າ</strong>. Draft ສາມາດກັບມາແກ້ໄຂພາຍຫຼັງໄດ້.</p>
+              <div class="submit-buttons">
+                <button class="btn secondary" id="saveDraftBtn">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></svg>
+                  ເກັບເປັນ Draft
+                </button>
+                <button class="btn primary" id="submitBtn">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
+                  ສົ່ງຄຳຂໍ
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-history">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">ເອກະສານຄຳຂໍອະນຸຍາດ</h1>
+            <p class="page-sub">ຕິດຕາມສະຖານະ, ສານຕໍ່ Draft ແລະ ດາວໂຫຼດເອກະສານທີ່ອະນຸມັດແລ້ວ.</p>
+          </div>
+          <button class="btn primary history-action" data-page-target="new">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            ສ້າງໃບຂໍໃໝ່
+          </button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-icon" style="background:var(--primary-soft);color:#1d5fa7">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="m5.45 5.11 2.25 7.01"></path><path d="M18.55 5.11 16.3 12.12"></path></svg>
+            </div>
+            <div><div class="stat-label">ກຳລັງດຳເນີນ</div><div class="stat-value" id="statActive">0</div></div>
+          </div>
+          <div class="stat">
+            <div class="stat-icon" style="background:var(--draft-soft);color:var(--draft)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+            </div>
+            <div><div class="stat-label">Draft</div><div class="stat-value" id="statDraft">0</div></div>
+          </div>
+          <div class="stat">
+            <div class="stat-icon" style="background:var(--danger-soft);color:var(--danger)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
+            </div>
+            <div><div class="stat-label">ຍົກເລີກ</div><div class="stat-value" id="statCancel">0</div></div>
+          </div>
+          <div class="stat">
+            <div class="stat-icon" style="background:var(--teal-soft);color:var(--teal)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg>
+            </div>
+            <div><div class="stat-label">ໄຟລ໌ແນບ</div><div class="stat-value" id="statFiles">0</div></div>
+          </div>
+        </div>
+
+        <section class="toolbar">
+          <header class="toolbar-head">
+            <div class="segmented">
+              <button data-scope="today">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+                ມື້ນີ້
+              </button>
+              <button class="active" data-scope="all">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+                ປະຫວັດ
+              </button>
+            </div>
+            <div class="search">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <input class="input" id="docSearch" placeholder="ຄົ້ນຫາເລກທີເອກະສານ, ປາຍທາງ ຫຼື ສະຖານະ">
+            </div>
+          </header>
+          <div class="filter-row">
+            <button class="active" data-filter="ALL">ທັງໝົດ</button>
+            <button data-filter="ACTIVE">ກຳລັງດຳເນີນ</button>
+            <button data-filter="DRAFT">Draft</button>
+            <button data-filter="SUCCESS">ສຳເລັດ</button>
+            <button data-filter="CANCEL">ຍົກເລີກ</button>
+          </div>
+
+          <div class="table-wrap doc-table desktop-docs">
+            <table>
+              <thead>
+                <tr>
+                  <th>ເລກທີເອກະສານ</th>
+                  <th>ສະຖານະ</th>
+                  <th>ວັນທີເຂົ້າ</th>
+                  <th>ວັນທີອອກ</th>
+                  <th>ປາຍທາງ</th>
+                  <th>ໄຟລ໌</th>
+                  <th style="text-align:right">ຈັດການ</th>
+                </tr>
+              </thead>
+              <tbody id="docRows"></tbody>
+            </table>
+          </div>
+
+          <div class="mobile-docs" id="docCards"></div>
+          <div class="empty-state" id="docEmpty">ບໍ່ພົບເອກະສານ</div>
+
+          <footer class="pagination">
+            <div class="small-muted" id="pageText">ສະແດງ 0 ຈາກ 0</div>
+            <div style="display:flex;align-items:center;gap:9px;justify-content:flex-end">
+              <button class="btn secondary small" id="prevPage">ກ່ອນໜ້າ</button>
+              <strong id="pageNumber">1/1</strong>
+              <button class="btn secondary small" id="nextPage">ຕໍ່ໄປ</button>
+            </div>
+          </footer>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const MAX_ROWS = 5;
+    const vehicleTypes = [
+      { id: "1", name: "ລົດ 6 ລໍ້", isRound: false },
+      { id: "2", name: "ລົດ 10 ລໍ້", isRound: false },
+      { id: "3", name: "ລົດພ່ວງ / ຫາງລາກ", isRound: true },
+      { id: "4", name: "ລົດບັນທຸກຕູ້ຄອນເທນເນີ", isRound: true },
+      { id: "5", name: "ລົດກະບະ", isRound: false },
+      { id: "6", name: "ລົດແທັງ", isRound: true }
+    ];
+    const statusMap = {
+      DRAFT: { label: "Draft", tone: "draft" },
+      WAITING: { label: "ລໍຖ້າ", tone: "waiting" },
+      QWAIT: { label: "ລໍຖ້າ", tone: "waiting" },
+      POINTING: { label: "ກຳລັງລະບຸສາຍທາງ", tone: "processing" },
+      SIGNING: { label: "ກຳລັງດຳເນີນການ / ລົງລາຍເຊັນ", tone: "processing" },
+      QSIGNING: { label: "ກຳລັງດຳເນີນການ / ລົງລາຍເຊັນ", tone: "processing" },
+      SIGNINED: { label: "ລົງລາຍເຊັນແລ້ວ", tone: "ready" },
+      READY: { label: "ພ້ອມສົ່ງມອບ", tone: "ready" },
+      SUCCESS: { label: "ສຳເລັດ", tone: "success" },
+      CANCEL: { label: "ຍົກເລີກ", tone: "cancel" }
+    };
+    const activeStatuses = ["WAITING", "QWAIT", "POINTING", "SIGNING", "QSIGNING", "SIGNINED", "READY"];
+    const docs = [
+      { id: "d1", no: "EN-2026-004821", status: "WAITING", dateIn: "2026-08-24 08:12", dateOut: null, destination: "ບ້ານໜອງພິງ, ເມືອງໄຊທານີ, ນະຄອນຫຼວງວຽງຈັນ", vehicles: 3, files: [{ name: "invoice-4821.pdf", kind: "pdf" }, { name: "loading-photo.jpg", kind: "img" }] },
+      { id: "d2", no: "EN-2026-004818", status: "POINTING", dateIn: "2026-08-24 07:40", dateOut: null, destination: "ບ້ານດົງໂດກ, ເມືອງໄຊທານີ, ນະຄອນຫຼວງວຽງຈັນ", vehicles: 2, files: [{ name: "manifest.pdf", kind: "pdf" }] },
+      { id: "d3", no: "EN-2026-004803", status: "SIGNING", dateIn: "2026-08-23 16:05", dateOut: null, destination: "ບ້ານທ່ານາແລ້ງ, ເມືອງຫາດຊາຍຟອງ, ນະຄອນຫຼວງວຽງຈັນ", vehicles: 5, files: [] },
+      { id: "d4", no: "EN-2026-004790", status: "SIGNINED", dateIn: "2026-08-23 10:22", dateOut: null, destination: "ບ້ານໂພນໂຮງ, ເມືອງໂພນໂຮງ, ແຂວງວຽງຈັນ", vehicles: 1, files: [{ name: "permit-draft.pdf", kind: "pdf" }] },
+      { id: "d5", no: "EN-2026-004776", status: "READY", dateIn: "2026-08-22 14:48", dateOut: null, destination: "ບ້ານນາເຕີຍ, ເມືອງນ້ຳທາ, ແຂວງຫຼວງນ້ຳທາ", vehicles: 2, files: [{ name: "permit-004776.pdf", kind: "pdf" }] },
+      { id: "d6", no: "EN-2026-004751", status: "SUCCESS", dateIn: "2026-08-21 09:03", dateOut: "2026-08-22 11:31", destination: "ບ້ານບໍ່ເຕັນ, ເມືອງນ້ຳທາ, ແຂວງຫຼວງນ້ຳທາ", vehicles: 4, files: [{ name: "permit-004751.pdf", kind: "pdf" }, { name: "gate-receipt.jpg", kind: "img" }] },
+      { id: "d7", no: "EN-2026-004744", status: "CANCEL", dateIn: "2026-08-20 15:20", dateOut: "2026-08-20 16:02", destination: "ບ້ານສີເກີດ, ເມືອງນາຊາຍທອງ, ນະຄອນຫຼວງວຽງຈັນ", vehicles: 1, note: "ບໍລິສັດຍົກເລີກ: ລົດບໍ່ພ້ອມໃຊ້ງານ", files: [] },
+      { id: "d8", no: "DRAFT-000192", status: "DRAFT", dateIn: "2026-08-24 06:55", dateOut: null, destination: "ບ້ານຫັດສະດີ, ເມືອງຈັນທະບູລີ, ນະຄອນຫຼວງວຽງຈັນ", vehicles: 2, note: "ລໍຖ້າເລກອ້າງອີງຈາກພາສີ", files: [{ name: "packing-list.pdf", kind: "pdf" }] }
+    ];
+
+    const state = {
+      page: "new",
+      vehicles: [],
+      editingId: null,
+      files: [],
+      scope: "all",
+      filter: "ALL",
+      q: "",
+      pageNo: 1
+    };
+
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+    const icon = {
+      edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>',
+      trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>',
+      view: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+      send: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>',
+      close: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>',
+      file: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg>',
+      download: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>'
+    };
+
+    function init() {
+      vehicleTypes.forEach((type) => {
+        const opt = document.createElement("option");
+        opt.value = type.id;
+        opt.textContent = type.name;
+        $("#vehicleType").appendChild(opt);
+      });
+      bindEvents();
+      renderVehicles();
+      renderStats();
+      renderDocs();
+    }
+
+    function bindEvents() {
+      $$("[data-page-target]").forEach((btn) => btn.addEventListener("click", () => showPage(btn.dataset.pageTarget)));
+      $("#menuBtn").addEventListener("click", toggleMobileNav);
+      $("#navBackdrop").addEventListener("click", closeMobileNav);
+      $("#pageBackdrop").addEventListener("click", closeMobileNav);
+      $("#vehicleType").addEventListener("change", renderRoundField);
+      $("#addVehicleBtn").addEventListener("click", addOrUpdateVehicle);
+      $("#cancelEditBtn").addEventListener("click", cancelEdit);
+      $("#files").addEventListener("change", (event) => {
+        state.files = Array.from(event.target.files || []);
+        renderSelectedFiles();
+      });
+      $("#saveDraftBtn").addEventListener("click", () => submitForm("draft"));
+      $("#submitBtn").addEventListener("click", () => submitForm("save"));
+      $$("[data-scope]").forEach((btn) => btn.addEventListener("click", () => {
+        state.scope = btn.dataset.scope;
+        state.pageNo = 1;
+        $$("[data-scope]").forEach((b) => b.classList.toggle("active", b === btn));
+        renderDocs();
+      }));
+      $$("[data-filter]").forEach((btn) => btn.addEventListener("click", () => {
+        state.filter = btn.dataset.filter;
+        state.pageNo = 1;
+        $$("[data-filter]").forEach((b) => b.classList.toggle("active", b === btn));
+        renderDocs();
+      }));
+      $("#docSearch").addEventListener("input", (event) => {
+        state.q = event.target.value;
+        state.pageNo = 1;
+        renderDocs();
+      });
+      $("#prevPage").addEventListener("click", () => {
+        state.pageNo = Math.max(1, state.pageNo - 1);
+        renderDocs();
+      });
+      $("#nextPage").addEventListener("click", () => {
+        state.pageNo += 1;
+        renderDocs();
+      });
+    }
+
+    function showPage(page) {
+      state.page = page;
+      $$(".page").forEach((el) => el.classList.toggle("active", el.id === "page-" + page));
+      $$("[data-page-target]").forEach((el) => el.classList.toggle("active", el.dataset.pageTarget === page));
+      closeMobileNav();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function toggleMobileNav() {
+      const isOpen = $("#mobileNav").classList.toggle("open");
+      $("#navBackdrop").classList.toggle("open", isOpen);
+      document.body.classList.toggle("nav-open", isOpen);
+    }
+
+    function closeMobileNav() {
+      $("#mobileNav").classList.remove("open");
+      $("#navBackdrop").classList.remove("open");
+      document.body.classList.remove("nav-open");
+    }
+
+    function clearErrors() {
+      $$(".field").forEach((field) => field.classList.remove("has-error"));
+      $("#rowsError").style.display = "none";
+      $("#rowLimitError").style.display = "none";
+    }
+
+    function renderRoundField() {
+      const type = vehicleTypes.find((item) => item.id === $("#vehicleType").value);
+      $("#roundField").style.display = type && type.isRound ? "block" : "none";
+      if (!type || !type.isRound) $("#rounds").value = "1";
+    }
+
+    function getVehicleDraft() {
+      return {
+        plate: $("#plate").value.trim(),
+        driver: $("#driver").value.trim(),
+        weight: $("#weight").value.trim(),
+        typeId: $("#vehicleType").value,
+        round: $("#rounds").value,
+        product: $("#product").value.trim(),
+        reference: $("#reference").value.trim()
+      };
+    }
+
+    function setVehicleDraft(row) {
+      $("#plate").value = row ? row.plate : "";
+      $("#driver").value = row ? row.driver : "";
+      $("#weight").value = row ? row.weight : "";
+      $("#vehicleType").value = row ? row.typeId : "";
+      $("#rounds").value = row && row.round ? row.round : "1";
+      $("#product").value = row ? row.product : "";
+      $("#reference").value = row ? row.reference : "";
+      renderRoundField();
+    }
+
+    function validateVehicle(row) {
+      clearErrors();
+      let ok = true;
+      const checks = [
+        ["plate", row.plate],
+        ["driver", row.driver],
+        ["weight", row.weight],
+        ["type", row.typeId],
+        ["product", row.product],
+        ["reference", row.reference]
+      ];
+      checks.forEach(([field, value]) => {
+        if (!value) {
+          document.querySelector(`[data-field="${field}"]`).classList.add("has-error");
+          ok = false;
+        }
+      });
+      return ok;
+    }
+
+    function addOrUpdateVehicle() {
+      const row = getVehicleDraft();
+      if (!validateVehicle(row)) return;
+      if (!state.editingId && state.vehicles.length >= MAX_ROWS) {
+        $("#rowLimitError").style.display = "block";
+        return;
+      }
+      const type = vehicleTypes.find((item) => item.id === row.typeId);
+      const payload = { ...row, round: type && type.isRound ? row.round || "1" : "" };
+      if (state.editingId) {
+        state.vehicles = state.vehicles.map((item) => item.id === state.editingId ? { ...payload, id: state.editingId } : item);
+      } else {
+        state.vehicles.push({ ...payload, id: String(Date.now()) });
+      }
+      cancelEdit();
+      renderVehicles();
+    }
+
+    function editVehicle(id) {
+      const row = state.vehicles.find((item) => item.id === id);
+      if (!row) return;
+      state.editingId = id;
+      setVehicleDraft(row);
+      $("#vehiclePanelTitle").textContent = "ແກ້ໄຂຂໍ້ມູນລົດ";
+      $("#addVehicleText").textContent = "ບັນທຶກລົດ";
+      $("#cancelEditBtn").style.display = "inline-flex";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteVehicle(id) {
+      state.vehicles = state.vehicles.filter((item) => item.id !== id);
+      if (state.editingId === id) cancelEdit();
+      renderVehicles();
+    }
+
+    function cancelEdit() {
+      state.editingId = null;
+      setVehicleDraft(null);
+      clearErrors();
+      $("#vehiclePanelTitle").textContent = "ຂໍ້ມູນລົດ";
+      $("#addVehicleText").textContent = "ເພີ່ມລົດ";
+      $("#cancelEditBtn").style.display = "none";
+    }
+
+    function typeName(id) {
+      return (vehicleTypes.find((item) => item.id === id) || {}).name || "-";
+    }
+
+    function renderVehicles() {
+      $("#vehicleCountTop").textContent = state.vehicles.length;
+      $("#vehicleCountPanel").textContent = state.vehicles.length;
+      $("#vehicleEmpty").style.display = state.vehicles.length ? "none" : "block";
+      $("#vehicleRows").innerHTML = state.vehicles.map((row) => `
+        <tr>
+          <td><strong>${escapeHtml(row.plate)}</strong></td>
+          <td>${escapeHtml(row.driver)}</td>
+          <td>${escapeHtml(typeName(row.typeId))}</td>
+          <td>${row.round ? escapeHtml(row.round) : "—"}</td>
+          <td>${escapeHtml(row.product)}</td>
+          <td>${escapeHtml(row.weight)}</td>
+          <td>${escapeHtml(row.reference)}</td>
+          <td>
+            <div class="row-actions">
+              <button class="icon-btn" title="ແກ້ໄຂ" onclick="editVehicle('${row.id}')">${icon.edit}</button>
+              <button class="icon-btn danger" title="ລຶບ" onclick="deleteVehicle('${row.id}')">${icon.trash}</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderSelectedFiles() {
+      $("#selectedFiles").innerHTML = state.files.map((file) => `
+        <span class="file-chip">${icon.file}<span>${escapeHtml(file.name)}</span></span>
+      `).join("");
+    }
+
+    function submitForm(kind) {
+      clearErrors();
+      let ok = true;
+      if (!state.vehicles.length) {
+        $("#rowsError").style.display = "block";
+        ok = false;
+      }
+      [["village", "#village"], ["district", "#district"], ["province", "#province"]].forEach(([field, selector]) => {
+        if (!$(selector).value.trim()) {
+          document.querySelector(`[data-field="${field}"]`).classList.add("has-error");
+          ok = false;
+        }
+      });
+      if (!ok) return;
+
+      const btn = kind === "draft" ? $("#saveDraftBtn") : $("#submitBtn");
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.textContent = kind === "draft" ? "ກຳລັງບັນທຶກ..." : "ກຳລັງສົ່ງ...";
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = original;
+        $("#noticeTitle").textContent = kind === "draft" ? "ເກັບເປັນ Draft ສຳເລັດ" : "ສົ່ງຄຳຂໍສຳເລັດ";
+        $("#noticeText").textContent = kind === "draft" ? "Draft ຖືກເກັບໄວ້ ແລະ ສາມາດກັບມາແກ້ໄຂພາຍຫຼັງ." : "ເອກະສານຖືກສ້າງດ້ວຍສະຖານະ ລໍຖ້າ. ສາມາດຕິດຕາມໄດ້ໃນໜ້າເອກະສານ.";
+        $("#notice").classList.add("show");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 700);
+    }
+
+    function renderStats() {
+      $("#statActive").textContent = docs.filter((doc) => activeStatuses.includes(doc.status)).length;
+      $("#statDraft").textContent = docs.filter((doc) => doc.status === "DRAFT").length;
+      $("#statCancel").textContent = docs.filter((doc) => doc.status === "CANCEL").length;
+      $("#statFiles").textContent = docs.reduce((total, doc) => total + doc.files.length, 0);
+    }
+
+    function filteredDocs() {
+      const q = state.q.trim().toLowerCase();
+      return docs.filter((doc) => {
+        if (state.scope === "today" && !doc.dateIn.startsWith("2026-08-24")) return false;
+        if (state.filter === "ACTIVE" && !activeStatuses.includes(doc.status)) return false;
+        if (state.filter !== "ALL" && state.filter !== "ACTIVE" && doc.status !== state.filter) return false;
+        if (!q) return true;
+        return [doc.no, doc.destination, statusMap[doc.status].label, doc.note || ""].join(" ").toLowerCase().includes(q);
+      });
+    }
+
+    function statusChip(status) {
+      const meta = statusMap[status] || { label: status, tone: "draft" };
+      return `<span class="status-chip status-${meta.tone}">${escapeHtml(meta.label)}</span>`;
+    }
+
+    function fileChips(doc) {
+      if (!doc.files.length) return '<span class="small-muted">—</span>';
+      return `<div class="doc-files">${doc.files.map((file) => `
+        <button class="file-chip" title="${escapeHtml(file.name)}">${icon.file}<span>${escapeHtml(file.name)}</span>${icon.download}</button>
+      `).join("")}</div>`;
+    }
+
+    function docActions(doc) {
+      if (doc.status === "DRAFT") {
+        return `<div class="row-actions">
+          <button class="btn primary small">${icon.send} ສົ່ງ</button>
+          <button class="btn secondary small">${icon.edit} ແກ້ໄຂ</button>
+          <button class="btn danger small">${icon.trash} ລຶບ</button>
+        </div>`;
+      }
+      if (doc.status === "WAITING" || doc.status === "QWAIT") {
+        return `<div class="row-actions">
+          <button class="btn secondary small">${icon.view} ເບິ່ງ</button>
+          <button class="btn danger small">${icon.close} ຍົກເລີກ</button>
+        </div>`;
+      }
+      if (doc.status === "CANCEL") {
+        return `<div class="row-actions">
+          <button class="btn secondary small">${icon.edit} ແກ້ໄຂ</button>
+          <button class="btn danger small">${icon.trash} ລຶບ</button>
+        </div>`;
+      }
+      return `<div class="row-actions"><button class="btn secondary small">${icon.view} ເບິ່ງ</button></div>`;
+    }
+
+    function renderDocs() {
+      const rows = filteredDocs();
+      const pageSize = 6;
+      const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+      state.pageNo = Math.min(state.pageNo, pages);
+      const start = (state.pageNo - 1) * pageSize;
+      const shown = rows.slice(start, start + pageSize);
+      $("#docEmpty").classList.toggle("show", !shown.length);
+      $("#docRows").innerHTML = shown.map((doc) => `
+        <tr>
+          <td><div class="doc-no">${escapeHtml(doc.no)}</div><div class="small-muted">${doc.vehicles} ຄັນ</div></td>
+          <td>${statusChip(doc.status)}</td>
+          <td class="small-muted">${escapeHtml(doc.dateIn)}</td>
+          <td class="small-muted">${escapeHtml(doc.dateOut || "—")}</td>
+          <td>${escapeHtml(doc.destination)}${doc.note ? `<div class="small-muted">${escapeHtml(doc.note)}</div>` : ""}</td>
+          <td>${fileChips(doc)}</td>
+          <td>${docActions(doc)}</td>
+        </tr>
+      `).join("");
+      $("#docCards").innerHTML = shown.map((doc) => `
+        <article class="doc-card">
+          <div class="doc-card-head">
+            <div>
+              <div class="doc-no">${escapeHtml(doc.no)}</div>
+              <div class="small-muted">${doc.vehicles} ຄັນ</div>
+            </div>
+            ${statusChip(doc.status)}
+          </div>
+          <p>${escapeHtml(doc.destination)}</p>
+          ${doc.note ? `<p class="small-muted">${escapeHtml(doc.note)}</p>` : ""}
+          <dl class="doc-dates">
+            <div><dt class="small-muted">ວັນທີເຂົ້າ</dt><dd style="margin:0">${escapeHtml(doc.dateIn)}</dd></div>
+            <div><dt class="small-muted">ວັນທີອອກ</dt><dd style="margin:0">${escapeHtml(doc.dateOut || "—")}</dd></div>
+          </dl>
+          <div style="margin-top:12px">${fileChips(doc)}</div>
+          <div class="doc-card-actions">${docActions(doc)}</div>
+        </article>
+      `).join("");
+      $("#pageText").textContent = rows.length ? `ສະແດງ ${start + 1}-${Math.min(start + pageSize, rows.length)} ຈາກ ${rows.length}` : "ສະແດງ 0 ຈາກ 0";
+      $("#pageNumber").textContent = `${state.pageNo}/${pages}`;
+      $("#prevPage").disabled = state.pageNo <= 1;
+      $("#nextPage").disabled = state.pageNo >= pages;
+    }
+
+    window.editVehicle = editVehicle;
+    window.deleteVehicle = deleteVehicle;
+    init();
+  </script>
+</body>
+</html>

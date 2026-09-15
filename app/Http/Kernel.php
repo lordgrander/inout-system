@@ -65,6 +65,10 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkadmin' => \App\Http\Middleware\Checkadmin::class,
         'checknormal' => \App\Http\Middleware\Checknormal::class,
+        'task.auth' => \App\Http\Middleware\TaskAuth::class,
+        'user-task.auth' => \App\Http\Middleware\UserTaskAuth::class,
+        'old-enter.auth' => \App\Http\Middleware\OldEnterAuth::class,
+        'old-user-task-v2.auth' => \App\Http\Middleware\OldUserTaskV2Auth::class,
 
     ];
 }

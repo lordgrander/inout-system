@@ -70,7 +70,6 @@ class ReportController extends Controller
             return view('notallow.see.print_new',compact('beta_enter','beta_enter_detail','user_data','beta_enter_road_detail','beta_enter_file'))->with('com_name',$com_name)->with('com_owner_name',$com_owner_name)->with('id',$id); 
         }
     }
-    
 
     public function print_abc($enter_number,$year,$left,$right,$image_size)
     {

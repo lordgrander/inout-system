@@ -666,7 +666,9 @@ div:where(.swal2-container) div:where(.swal2-html-container)
                                                                     <button  class="btn-light down6" data-id="{{ $row_enter->enter_id }}">ຕີກັບ</button> 
                                                                 @elseif($row_enter->status=='SUCCESS')
                                                                 <br>
-                                                                <button  class="btn-light down7" data-id="{{ $row_enter->enter_id }}">ດືງກັບ</button> 
+                                                                    @if(auth()->user()->is_admin=='5')
+                                                                        <button  class="btn-light down7" data-id="{{ $row_enter->enter_id }}">ດືງກັບ</button> 
+                                                                    @endif 
 
                                                                 @else
 
@@ -682,7 +684,7 @@ div:where(.swal2-container) div:where(.swal2-html-container)
                                                                 @elseif($row_enter->status=='SIGNING')
                                                                     <button class="btn-light down3" data-id="{{ $row_enter->enter_id}}">ດຶງກັບ </button>
                                                                 @elseif($row_enter->status=='SIGNINED')
-                                                                    <button class="btn-light down5x"  data-id="{{ $row_enter->enter_id}}">ຕີກັບ</button>
+                                                                    <!-- <button class="btn-light down5x"  data-id="{{ $row_enter->enter_id}}">ຕີກັບ</button> -->
                                                                 @else
                                                                 @endif
                                                             @endif

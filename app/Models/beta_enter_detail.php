@@ -30,6 +30,8 @@ class beta_enter_detail extends Model
         'remark_created_at',
         'remark_canceled_at',
         'remark_by',
+        'quotar_id',
+        'quotar_usage_id',
     ];
 
 

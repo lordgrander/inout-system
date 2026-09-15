@@ -1,118 +1,154 @@
 <x-app-layout>
   <style>
     :root{
-      --ink:#0f172a; --sub:#475569; --line:#e2e8f0; --soft:#f8fafc; --brand:#0a4e9b;
+      --ink:#182230;
+      --muted:#667085;
+      --line:#d9e2ec;
+      --soft:#f7fafc;
+      --brand:#0a4e9b;
+      --brand-2:#0f766e;
+      --warn:#b7791f;
+      --danger:#b42318;
     }
-    body{color:var(--ink)}
-    .card-elev{border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(2,8,23,.06)}
-    .card-hdr{padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbfdff);display:flex;align-items:center;justify-content:space-between}
-    .card-hdr .title{font-weight:800;font-size:18px}
-    .hint{color:var(--sub);font-size:12px}
-    .k{font-size:12px;color:var(--sub);margin-bottom:6px}
-    .table_display_data{overflow-x:auto;white-space:nowrap}
-    .table thead th{background:var(--soft);border-bottom:1px solid var(--line)}
-    .table td,.table th{vertical-align:middle}
-    .btn-outline-success{border-radius:10px}
-    .action-link{cursor:pointer;font-weight:600}
+    body{color:var(--ink);background:#f3f7fb}
+    .permit-shell{max-width:1280px;margin:0 auto;padding:14px 14px 28px}
+    .permit-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px}
+    .permit-title{font-size:24px;font-weight:900;letter-spacing:0;color:#0b2f5b;margin:0}
+    .permit-sub{font-size:13px;color:var(--muted);margin:3px 0 0}
+    .permit-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{display:inline-flex;align-items:center;min-height:30px;border:1px solid var(--line);border-radius:999px;background:#fff;padding:5px 11px;font-size:12px;font-weight:800;color:#344054}
+    .layout-grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:14px;align-items:start}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 22px rgba(16,24,40,.06)}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:#fbfdff}
+    .panel-title{font-size:16px;font-weight:900;margin:0;color:#102a43}
+    .panel-body{padding:16px}
+    .field-grid{display:grid;grid-template-columns:1fr;gap:13px}
+    .field-grid.two{grid-template-columns:minmax(0,1fr) 92px;gap:10px}
+    .field label,.field-label{display:block;margin-bottom:6px;font-size:12px;font-weight:900;color:#4a5568;text-transform:uppercase}
+    .form-control{border-color:var(--line)!important;border-radius:8px!important;min-height:42px;color:#25364a!important}
+    .form-control:focus{border-color:#66a3e8!important;box-shadow:0 0 0 4px rgba(10,78,155,.12)!important}
+    .hint{font-size:12px;color:var(--muted)}
+    .vehicle-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+    .btn{border-radius:8px!important;font-weight:800!important}
+    .btn-primary-soft{background:#0a4e9b;color:#fff;border:1px solid #0a4e9b}
+    .btn-primary-soft:hover{color:#fff;background:#083f7d}
+    .btn-draft{background:#fff;color:#344054;border:1px solid var(--line)}
+    .btn-draft:hover{background:#f8fafc;color:#182230}
+    .btn-submit{background:#0f766e;color:#fff;border:1px solid #0f766e}
+    .btn-submit:hover{background:#0b5f59;color:#fff}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}
+    .table{margin-bottom:0}
+    .table thead th{background:#eef4fb!important;border-bottom:1px solid var(--line)!important;color:#344054;font-size:12px;text-transform:uppercase;white-space:nowrap}
+    .table td,.table th{vertical-align:middle!important}
+    #build:empty:before{content:'ຍັງບໍ່ມີລາຍການລົດ';display:block;padding:22px;text-align:center;color:var(--muted);font-weight:800}
+    .action-link{cursor:pointer;font-weight:900}
     .action-link:hover{text-decoration:underline}
-
-    /* modal */
-    #modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.35)}
-    #modal-content{background:#fff;border:2px solid #1c73ff;border-radius:12px;width:min(520px,90%);margin:15% auto;padding:18px}
+    .destination-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .submit-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+    .submit-buttons{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+    #modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(15,23,42,.42)}
+    #modal-content{background:#fff;border:1px solid #8bb8e8;border-radius:8px;width:min(520px,92%);margin:16vh auto;padding:18px;box-shadow:0 20px 50px rgba(15,23,42,.2)}
     .display_msg{margin:0;font-size:15px}
-
-    /* spinner */
     .spinner{display:inline-block;position:relative;width:64px;height:64px}
-    .q{box-sizing:border-box;display:block;position:absolute;width:40%;height:40%;top:30%;left:30%;border-radius:50%;border:6px solid #000;border-color:#000 transparent transparent transparent;animation:spin 1.2s linear infinite}
+    .q{box-sizing:border-box;display:block;position:absolute;width:40%;height:40%;top:30%;left:30%;border-radius:50%;border:6px solid #0a4e9b;border-color:#0a4e9b transparent transparent transparent;animation:spin 1.2s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* grid */
-    .grid-container{display:grid;grid-template-columns:repeat(3,1fr);grid-gap:12px}
-    .grid-item{padding:0}
+    @media (max-width: 980px){
+      .permit-head{align-items:flex-start;flex-direction:column}
+      .permit-meta{justify-content:flex-start}
+      .layout-grid{grid-template-columns:1fr}
+      .destination-grid{grid-template-columns:1fr}
+      .submit-bar{align-items:stretch;flex-direction:column}
+      .submit-buttons{justify-content:stretch}
+      .submit-buttons .btn{flex:1}
+    }
   </style>
 
-  {{-- modal / toast --}}
   <div id="modal">
     <div id="modal-content">
       <p class="laob display_msg"></p>
     </div>
   </div>
 
-  <div class="py-3 laos">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+  <div class="permit-shell laos">
+    <div class="permit-head">
+      <div>
+        <h1 class="permit-title">ຟອມຂໍອະນຸຍາດລົດ</h1>
+        <p class="permit-sub">ປ້ອນລາຍການລົດ, ປາຍທາງ ແລະ ແນບເອກະສານ</p>
+      </div>
+      <div class="permit-meta">
+        <span class="pill">ສູງສຸດ 5 ຄັນ</span>
+        <span class="pill">PDF / JPG / PNG</span>
+      </div>
+    </div>
 
-      {{-- section: vehicle info --}}
-      <div class="card-elev bg-white overflow-hidden sm:rounded-lg mb-3">
-        <div class="card-hdr">
-          <div class="title">ຟອມຂໍອະນຸຍາດລົດ</div>
-          <span class="hint">ເພີ່ມລາຍການລົດແຕ່ລະຄັນ ແລ້ວກົດ “ເພີ່ມຂໍ້ມູນ”</span>
+    <div class="layout-grid">
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">ຂໍ້ມູນລົດ</h2>
+          <span class="pill show_rem" style="display:none;">0/5</span>
         </div>
-
-        <div class="p-3">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="k">ທະບຽນລົດ</div>
+        <div class="panel-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="plate">ທະບຽນລົດ</label>
               <input type="text" class="form-control" id="plate" placeholder="ທະບຽນລົດ">
-
-              <div class="k mt-3">ຊື່ຜູ້ຂັບ</div>
-              <input type="text" class="form-control" id="d_name" placeholder="ຊື່ຜູ້ຂັບ">
-
-              <div class="k mt-3">ນ້ຳໜັກ</div>
-              <input type="text" class="form-control" id="weight" placeholder="ນ້ຳໜັກ" onkeyup="this.value=Comma(this.value);">
-              <div class="hint mt-1">ພິມເປັນຕົວເລກ, ລະບົບຈະໃສ່ , ໃຫ້ອັດຕະໂນມັດ</div>
             </div>
-
-            <div class="col-md-6">
-              <div class="k">ປະເພດລົດ</div>
-              <div class="d-flex justify-content-start gap-2"> 
-                <div id="forage" style="width:80%;"> 
+            <div class="field">
+              <label for="d_name">ຊື່ຜູ້ຂັບ</label>
+              <input type="text" class="form-control" id="d_name" placeholder="ຊື່ຜູ້ຂັບ">
+            </div>
+            <div class="field">
+              <label for="weight">ນ້ຳໜັກ</label>
+              <input type="text" class="form-control" id="weight" placeholder="ນ້ຳໜັກ" onkeyup="this.value=Comma(this.value);">
+              <div class="hint mt-1">ຕົວເລກ, comma ແລະ dot ເທົ່ານັ້ນ</div>
+            </div>
+            <div class="field">
+              <label for="t_model">ປະເພດລົດ</label>
+              <div class="field-grid two">
+                <div id="forage">
                   <select id="t_model" class="form-control round-check">
-                      <option value="19" data-round="1">ລົດ 4 ລໍ້</option> 
-
-                      {{-- Use collect() to enable the where() method --}}
-                      @foreach (collect($beta_t_type)->where('t_type_id', '!=', 19) as $row) 
-                          <option value="{{ $row->t_type_id }}" data-round="{{ $row->is_round }}">
-                              {{ $row->t_type_name }}
-                          </option> 
-                      @endforeach
+                    <option value="19" data-round="1">ລົດ 4 ລໍ້</option>
+                    @foreach (collect($beta_t_type)->where('t_type_id', '!=', 19) as $row)
+                      <option value="{{ $row->t_type_id }}" data-round="{{ $row->is_round }}">
+                        {{ $row->t_type_name }}
+                      </option>
+                    @endforeach
                   </select>
                 </div>
-                 <div id="round" style="width:20%;"> 
-                  <select id="tell_round" class="form-control" style="width:100%;">
+                <div id="round">
+                  <select id="tell_round" class="form-control">
                     @for($i=1;$i<=5;$i++)
                       <option value="{{$i}}">{{$i}} ຖ້ຽວ</option>
                     @endfor
                   </select>
-                </div>  
-              </div>
-
-              <div class="k mt-3">ສິນຄ້ານຳເຂົ້າ</div>
-              <input type="text" class="form-control" id="p_import" placeholder="ສິນຄ້ານຳເຂົ້າ" style="color:#797a7c!important;" value="{{ old('p_import') ?? session('p_import') }}">
-
-              <div class="k mt-3">ເລກທີນຳເຂົ້າສິນຄ້າ</div>
-              <input type="text" class="form-control" id="detail" placeholder="ເລກທີນຳເຂົ້າສິນຄ້າ" style="color:#797a7c!important;" value="{{ old('detail') ?? session('detail') }}">
-
-              <div class="text-right mt-4">
-                <button type="button" class="btn btn-outline-success" id="add">
-                  ເພີ່ມຂໍ້ມູນ
-                  <span class="show_rem" style="display:none;">0/5 :</span>
-                </button>
+                </div>
               </div>
             </div>
+            <div class="field">
+              <label for="p_import">ສິນຄ້ານຳເຂົ້າ</label>
+              <input type="text" class="form-control" id="p_import" placeholder="ສິນຄ້ານຳເຂົ້າ" value="{{ old('p_import') ?? session('p_import') }}">
+            </div>
+            <div class="field">
+              <label for="detail">ເລກທີນຳເຂົ້າສິນຄ້າ</label>
+              <input type="text" class="form-control" id="detail" placeholder="ເລກທີນຳເຂົ້າສິນຄ້າ" value="{{ old('detail') ?? session('detail') }}">
+            </div>
+          </div>
+
+          <div class="vehicle-actions">
+            <span class="hint">ກົດເພີ່ມເພື່ອສ້າງລາຍການໃນຕາຕະລາງ</span>
+            <button type="button" class="btn btn-primary-soft" id="add">ເພີ່ມຂໍ້ມູນ</button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {{-- section: list + destination + files --}}
-      <div class="card-elev bg-white overflow-hidden sm:rounded-lg">
-        <div class="card-hdr">
-          <div class="title">ລາຍການລົດ, ປາຍທາງ, ແນບເອກະສານ</div>
-          <span class="hint">ຈຳນວນສູງສຸດ 5 ລາຍການ</span>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">ລາຍການ ແລະ ປາຍທາງ</h2>
+          <span class="hint">ກວດກ່ອນສົ່ງ</span>
         </div>
-
-        <div class="p-3">
-          <form id="form-data" class="">
-            <div class="table_display_data mb-2">
+        <div class="panel-body">
+          <form id="form-data">
+            <div class="table-wrap mb-3">
               <table class="table table-bordered">
                 <thead>
                   <tr>
@@ -122,46 +158,42 @@
                     <th>ສິນຄ້ານຳເຂົ້າ</th>
                     <th>ນ້ຳໜັກ</th>
                     <th>ເລກທີນຳເຂົ້າ</th>
-                    <th style="width:130px">ຈັດການ</th>
+                    <th style="width:136px">ຈັດການ</th>
                   </tr>
                 </thead>
                 <tbody id="build"></tbody>
               </table>
             </div>
 
-            <div class="k">ລະບຸປາຍທາງ</div>
-            <div class="grid-container">
-              <div class="grid-item">
-                <input type="text" class="form-control address" id="address" name="address" autocomplete="off" placeholder="ບ້ານ" value="{{ old('address') ?? session('address') }}">
-              </div>
-              <div class="grid-item">
-                <input type="text" class="form-control district" id="district" name="district" autocomplete="off" placeholder="ເມືອງ" value="{{ old('district') ?? session('district') }}">
-              </div>
-              <div class="grid-item">
-                <input type="text" class="form-control province" id="province" name="province" autocomplete="off" placeholder="ແຂວງ" value="{{ old('province') ?? session('province') }}">
-              </div>
+            <div class="field-label">ລະບຸປາຍທາງ</div>
+            <div class="destination-grid">
+              <input type="text" class="form-control address" id="address" name="address" autocomplete="off" placeholder="ບ້ານ" value="{{ old('address') ?? session('address') }}">
+              <input type="text" class="form-control district" id="district" name="district" autocomplete="off" placeholder="ເມືອງ" value="{{ old('district') ?? session('district') }}">
+              <input type="text" class="form-control province" id="province" name="province" autocomplete="off" placeholder="ແຂວງ" value="{{ old('province') ?? session('province') }}">
             </div>
 
             <input type="text" class="form-control lasttails mt-3" id="lasttails" name="lasttails" autocomplete="off" placeholder="ລະບຸພິເສດສຳລັບປາຍທາງ ( ຖ້າຕ້ອງການ )">
 
-            <div class="mt-3">
-              <small class="hint">ແນບເອກະສານ (PDF, JPG, PNG) ລວມຂະໜາດບໍ່ເກີນ 15MB</small>
-              <input type="file" class="form-control mt-1" id="upload_files" name="upload_files[]" multiple>
+            <div class="field mt-3">
+              <label for="upload_files">ແນບເອກະສານ</label>
+              <input type="file" class="form-control" id="upload_files" name="upload_files[]" multiple>
               <input type="hidden" class="index" id="index" name="index">
+              <div class="hint mt-1">PDF, JPG, PNG ລວມຂະໜາດບໍ່ເກີນ 15MB</div>
             </div>
 
-            <div class="text-right mt-4">
-              <button class="btn btn-outline-success" id="draft" type="button">ເກັບໄວ້</button>
-              <button class="btn btn-outline-success" id="save" type="button">ສົ່ງແບບຟອມ</button>
+            <div class="submit-bar">
+              <div class="hint">ສົ່ງແລ້ວສະຖານະຈະເປັນ WAITING</div>
+              <div class="submit-buttons">
+                <button class="btn btn-draft" id="draft" type="button">ເກັບໄວ້</button>
+                <button class="btn btn-submit" id="save" type="button">ສົ່ງແບບຟອມ</button>
+              </div>
             </div>
           </form>
         </div>
-      </div>
-
+      </section>
     </div>
   </div>
 
-  {{-- your existing CDNs --}}
   <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
@@ -170,7 +202,6 @@
   </script>
 
   <script>
-    // keep your original logic & variables
     var index = 0;
     var rem = 0;
 
@@ -203,7 +234,6 @@
       var el = document.getElementById(id); if(el) el.value = valueToSelect;
     }
 
-    // numeric constraints
     $('#weight').on('keypress', onlyNum); $('#weight').on('cut copy paste', blockPaste);
     $(document).on('keypress','.sub_weight', onlyNum);
     $(document).on('cut copy paste','.sub_weight', blockPaste);
@@ -213,15 +243,11 @@
     }
     function blockPaste(e){ e.preventDefault(); }
 
-    // add row
     $('#add').on('click', function(){
       let plate = jugtext($('#plate').val());
       let d_name = jugtext($('#d_name').val());
       let t_model = Number($('#t_model').val());
- 
       let is_round = parseInt($('#t_model').find(':selected').data('round'));
-      {{-- // $('#t_model').find(':selected').val(); --}}
-
       let display_t_model = arr_t_model.find(x=>x.id===t_model);
       let p_import = jugtext($('#p_import').val());
       let weight = jugtext($('#weight').val());
@@ -238,24 +264,19 @@
       if(rem===5){ showAlert("ຈຳນວນລົດຄົບ 5 ຄັນ ກະລຸນາສົ່ງແບບຟອມ"); return; }
       rem += 1; index += 1;
 
-
       let limb_box = '';
       let limb_edit_box = ``;
       if(is_round===1){
         if(tell_round !== 1)
         {
-          limb_box = '('+tell_round+' ຖ້ຽວ)';   
-          limb_edit_box = `<select id="input_t_model_round_${index}" name="input_t_model_round_${index}">
+          limb_box = '('+tell_round+' ຖ້ຽວ)';
+          limb_edit_box = `<select class="form-control" id="input_t_model_round_${index}" name="input_t_model_round_${index}">
                               @for($i=1;$i<=5;$i++)
                                 <option value="{{$i}}">{{$i}} ຖ້ຽວ</option>
                               @endfor
-                            </select>
-          `;       
-        } 
-      } 
-
-      console.log(limb_box,'-',tell_round,'-',is_round);
-      console.log(limb_edit_box);
+                            </select>`;
+        }
+      }
 
       let display_dum =
       '<tr id="display_'+index+'">\
@@ -273,7 +294,7 @@
       '<tr id="input_'+index+'" style="display:none">\
         <td><input type="text" class="form-control" id="input_plate_'+index+'" name="input_plate_'+index+'" value="'+plate+'"></td>\
         <td><input type="text" class="form-control" id="input_d_name_'+index+'" name="input_d_name_'+index+'" value="'+d_name+'"></td>\
-        <td><div class="d-flex justify-content-start"><select class="form-control" id="input_t_model_'+index+'" name="input_t_model_'+index+'">'+dum_input_option+'</select> '+limb_edit_box+' </div> </td>\
+        <td><div class="d-flex justify-content-start" style="gap:6px"><select class="form-control" id="input_t_model_'+index+'" name="input_t_model_'+index+'">'+dum_input_option+'</select> '+limb_edit_box+' </div></td>\
         <td><input type="text" class="form-control" id="input_p_import_'+index+'" name="input_p_import_'+index+'" value="'+p_import+'"></td>\
         <td><input type="text" class="form-control sub_weight" id="input_weight_'+index+'" name="input_weight_'+index+'" value="'+weight+'"></td>\
         <td><input type="text" class="form-control" id="input_detail_'+index+'" name="input_detail_'+index+'" value="'+detail+'"></td>\
@@ -285,12 +306,11 @@
       SelectElement("input_t_model_"+index, t_model);
       SelectElement("input_t_model_round_"+index, tell_round);
       SelectElement("tell_round", '1');
+      $('.show_rem').text(rem + '/5').show();
 
-      // clear input set
       $('#plate').val(''); $('#d_name').val(''); $('#weight').val('');
     });
 
-    // edit / cancel / save
     var dum_plate='', dum_d_name='', dum_t_model='', dum_p_import='', dum_weight='', dum_detail='';
     $('#build').on('click','.edit',function(){
       let i = $(this).attr("id");
@@ -327,7 +347,6 @@
       dum_plate=dum_d_name=dum_t_model=dum_p_import=dum_weight=dum_detail='';
     });
 
-
     $('#build').on('click','.edit_save',function(){
       let i = $(this).attr("id");
       let v_plate = jugtext($('#input_plate_'+i).val());
@@ -356,7 +375,6 @@
       $("#input_"+i).hide(); $("#display_"+i).show();
     });
 
-    // delete
     $('#build').on('click','.delete',function(e){
       if(!confirm("Are you sure?")) return false;
       let i = $(this).attr("id");
@@ -370,10 +388,10 @@
 
       $('#display_'+i).hide(); $('#input_'+i).hide();
       rem -= 1;
+      $('.show_rem').text(rem + '/5').toggle(rem > 0);
       return false;
     });
 
-    // submit
     function blockAndSpin(){
       let html = '<center><div class="spinner"><div class="q"></div></div></center>';
       showAlert(html);
@@ -433,26 +451,22 @@
       });
     });
 
-    
     $('.round-check').on('change' ,function(){
       let check = $(this).find(':selected').attr('data-round');
-      $(this).find(':selected').val();
       if(check==='1')
-      { 
+      {
         $('#round').show();
-        $('#round').val('1');
         SelectElement("tell_round", '1');
-$('#forage').css('width', '80%');        
-
-      } 
+        $('#forage').css('width', 'auto');
+      }
       else
       {
         $('#round').hide();
         SelectElement("tell_round", '1');
-$('#forage').css('width', '100%');      }
+        $('#forage').css('width', '100%');
+      }
     });
 
-    // live session saves (unchanged)
     $.ajaxSetup({ headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
     ['address','district','province','p_import','detail'].forEach(function(id){
       let el=document.querySelector('#'+id); if(!el) return;

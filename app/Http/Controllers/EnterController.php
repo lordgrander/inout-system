@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 
 use Carbon\carbon;
@@ -157,7 +159,7 @@ class EnterController extends Controller
             // $beta_enter->enter_type = "QUOTAR"; // we have this in quotar
             $beta_enter->save();
 
-            $enter_id = $beta_enter->id;
+            $enter_id = $beta_enter->enter_id;
  
             for($i=1;$i<=$index;$i++)
             {
@@ -293,11 +295,66 @@ class EnterController extends Controller
             //     File::delete($path);
             // }
 
+            $this->sendEnterSavedDiscordNotification($enter_id);
+
             return response()->json([
                 'status'=>200,
                 'message'=>$dum_str,
             ]);
             
+        }
+    }
+
+    private function sendEnterSavedDiscordNotification($enter_id)
+    {
+        $webhookUrl = config('services.discord.new_enter_webhook_url');
+
+        if (!$webhookUrl || !$enter_id) {
+            return;
+        }
+
+        try {
+            $enter = beta_enter::where('enter_id', $enter_id)->first();
+
+            if (!$enter) {
+                return;
+            }
+
+            $company = beta_company_group::where('com_id', $enter->com_id)->first();
+            $details = beta_enter_detail::where('enter_id', $enter_id)->orderBy('enter_detail_id')->get();
+            $fileCount = beta_enter_file::where('enter_id', $enter_id)->count();
+            $destination = trim(collect([$enter->address, $enter->district, $enter->province])->filter()->implode(', '));
+            $number = $enter->enter_number && $enter->enter_number !== '0'
+                ? $enter->enter_number
+                : 'ENTER-'.date('Y', strtotime($enter->date_make)).'-'.str_pad((string) $enter->enter_id, 6, '0', STR_PAD_LEFT);
+
+            $vehicleLines = $details->take(5)->map(function ($detail, $index) {
+                return ($index + 1).'. '.$detail->plate_number.' | '.$detail->d_name.' | '.$detail->p_import.' | '.$detail->weight;
+            })->implode("\n");
+
+            Http::timeout(5)->post($webhookUrl, [
+                'username' => 'Vehicle Permit System',
+                'content' => '[ENTER] ມີໃບອະນຸຍາດໃໝ່ຖືກບັນທຶກສຳເລັດ',
+                'embeds' => [[
+                    'title' => '[ENTER] '.$number,
+                    'color' => 0x0a427a,
+                    'fields' => [
+                        ['name' => 'ບໍລິສັດ', 'value' => $company->com_name ?? 'No company', 'inline' => true],
+                        ['name' => 'ຜູ້ສົ່ງ', 'value' => Auth::user()->name ?? '-', 'inline' => true],
+                        ['name' => 'ສະຖານະ', 'value' => $enter->status ?? '-', 'inline' => true],
+                        ['name' => 'ວັນທີ', 'value' => date('d-m-Y', strtotime($enter->date_make)), 'inline' => true],
+                        ['name' => 'ຈຳນວນລົດ', 'value' => (string) $details->count(), 'inline' => true],
+                        ['name' => 'ໄຟລ໌ແນບ', 'value' => (string) $fileCount, 'inline' => true],
+                        ['name' => 'ປາຍທາງ', 'value' => $destination ?: '-', 'inline' => false],
+                        ['name' => 'ລາຍການລົດ', 'value' => $vehicleLines ?: '-', 'inline' => false],
+                    ],
+                ]],
+            ]);
+        } catch (\Throwable $exception) {
+            Log::warning('Discord enter notification failed', [
+                'enter_id' => $enter_id,
+                'message' => $exception->getMessage(),
+            ]);
         }
     }
 
@@ -402,7 +459,7 @@ class EnterController extends Controller
             $beta_enter->province = preg_replace('/[^a-zA-Z0-9ก-๙ກ-໛ໝໜ\s]/u', '', $request->province);
             $beta_enter->save();
 
-            $enter_id = $beta_enter->id;
+            $enter_id = $beta_enter->enter_id;
  
             for($i=1;$i<=$index;$i++)
             {
@@ -836,7 +893,7 @@ class EnterController extends Controller
         
         $beta_enter_draft = DB::select("SELECT * FROM beta_enter WHERE com_id = '".$com_id."' AND status = 'DRAFT' ORDER BY enter_id DESC LIMIT 50");
         $beta_enter_file_draft = DB::select("SELECT f.*,e.status FROM beta_enter_file f LEFT JOIN beta_enter e ON f.enter_id=e.enter_id WHERE e.status = 'DRAFT' AND f.user_id = '".Auth::user()->id."'");
-
+      
         return view('allow.enter.list',compact(
                                                 'user_list',
                                                 'beta_enter',
@@ -846,6 +903,7 @@ class EnterController extends Controller
                                                 'beta_enter_file_cancel',
                                                 'beta_enter_file_draft',
                                                 ))->with('com_name',$com_name);
+
     }
     
     public function history()
@@ -883,6 +941,7 @@ class EnterController extends Controller
 
     public function view($id)
     {
+        // return redirect()->route('EnterList'); 
         $user_data = DB::select("SELECT * FROM users WHERE id = '".Auth::user()->id."'");
         $com_name = DB::select("SELECT com_name FROM beta_company_group WHERE com_id = '".$user_data[0]->com_id."'");
         
@@ -935,9 +994,7 @@ class EnterController extends Controller
         else
         {
 
-        }
-
- 
+        }  
 
         return view('allow.enter.view',compact('beta_enter','beta_enter_detail','user_data'))
         ->with('com_name',$com_name)
@@ -1097,6 +1154,8 @@ class EnterController extends Controller
             'date_make' => Carbon::now('Asia/Bangkok'),
             'date_in' => Carbon::now('Asia/Bangkok'),
         ]);
+
+        $this->sendEnterSavedDiscordNotification($request->id);
 
         return response()->json([
             'status'=>200,

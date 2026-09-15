@@ -1,0 +1,61 @@
+Please update app/Http/Controllers/TaskController.php so /task/dashboard/data supports Target-Limited Report behavior for 2025.
+
+Rules:
+- Keep the dashboard UI unchanged.
+- Only change TaskController.php.
+- Normal dashboard behavior should remain for non-2025 searches.
+- If date_from starts with year 2025, check daily_vehicle_statistics only for 2025 dates in the selected date range.
+- For 2025 dates that exist in daily_vehicle_statistics, use VehicleDetailSelectionService to select limited enter_detail_id rows matching daily_vehicle_statistics.vehicles.
+- For 2025 dates missing from daily_vehicle_statistics, keep normal rows.
+- For 2026 or later dates in the same range, keep normal rows.
+- Apply target selection first, then dashboard filters like plate_number, company_name, d_name, p_import, and enter_number should search only inside the selected limited rows for limited dates.
+- Keep road permission and take_visible behavior unchanged.
+- Add summary fields target_limited and target_limited_dates to the JSON response if helpful.
+- Run php -l app/Http/Controllers/TaskController.php after editing.
+
+Remark / follow-up:
+- When a 2025 date exists in daily_vehicle_statistics, target-limited dashboard rows for that date should ignore special_user_road road permission such as roads 42 and 43. The daily statistic target is the source of truth for those limited dates.
+- Do not hard-code road IDs like 42 or 43 in TaskController.php. For normal dates, road permission should still come from the existing special_user_road behavior.
+- For mixed ranges, dates that exist in daily_vehicle_statistics use target-limited selected rows without road permission, while missing 2025 dates and 2026+ dates keep normal dashboard road permission.
+
+New user-task dashboard prompt log:
+- Build a second dashboard flow similar to TaskController using the same dashboard UI Blade style.
+- URLs/routes should be `/user-task/login`, `/user-task/dashboard`, and `/user-task/dashboard/data`.
+- Login should use the `users` table with `email` as the login ID and `password` checked with Laravel Hash.
+- Users with `is_admin = 1` must not be allowed to login to this user-task dashboard. Other users are allowed.
+- User-task dashboard data must use regular filtering only: no hard-coded road IDs, no special_user_road permission filter, no take_visible limit, and no daily_vehicle_statistics / target-limited behavior.
+- Keep the dashboard date/search/file UI behavior similar to the task dashboard unless a future request changes it.
+
+User-task workflow update:
+- User-task dashboard should show each role only its workflow statuses, with a status dropdown in the UI.
+- Role 2 can see WAITING, POINTING, READY, and SUCCESS. Role 2 can move WAITING to POINTING, pull POINTING back to WAITING, move READY to SUCCESS, and pull SUCCESS back to READY.
+- Role 3 can see POINTING, SIGNING, SIGNED, and READY. In the database, SIGNED is stored as SIGNINED. Role 3 can pull SIGNING back to POINTING and pull READY back to SIGNED.
+- Role 3 and role 5 should not use a simple POINTING to SIGNING status flip. For POINTING work, show a popup like the old notallow/see/list flow. The popup must let the user pick beta_main_road, select one or more beta_road_select roads, choose a saved company subject if available, enter/edit the note, then submit. Submit should save beta_enter_road_detail rows, update beta_enter.main_road_id/feed_back_msg/status to SIGNING, and record feedback.
+- Role 4 can see SIGNING, SIGNED, READY, and SUCCESS. In the database, SIGNED is stored as SIGNINED. Role 4 can move SIGNING to SIGNED, pull SIGNED back to SIGNING, move READY to SUCCESS, pull READY back to SIGNED, and pull SUCCESS back to READY.
+- Role 5 can see all workflow statuses: WAITING, POINTING, SIGNING, SIGNED, READY, and SUCCESS. In the database, SIGNED is stored as SIGNINED.
+
+User-task pagination/loading update:
+- `/user-task/dashboard/data` should return 20 parent documents per page with pagination metadata in `summary.pagination`.
+- The first visit should load today's date range and default workflow statuses only. SUCCESS must not be included by default; role 2 can choose SUCCESS from the status dropdown when needed.
+- Pagination buttons should stop and uncheck auto reload so page navigation is not interrupted by background refresh.
+- Loading popup should hide reliably after each data request completes or fails.
+- User-task auth middleware should refresh `users.is_admin` from the database on every authenticated request so manual role changes during testing are reflected without logout. If a user becomes `is_admin = 1`, remove the user-task session and redirect to login.
+- User-task status dropdown options should also refresh from `summary.visible_statuses` after each data load, so changing `users.is_admin` during testing updates the dropdown without logout.
+
+User-task pointing popup update:
+- `/user-task/dashboard` should load beta_main_road and beta_road_select for the pointing popup.
+- `/user-task/dashboard/data` rows should include `com_id` so the popup can load saved subjects for that company.
+- User-task should use its own authenticated subject endpoint for this dashboard because `/subject/list` belongs to the regular Laravel auth group, while `/user-task` uses user-task session auth.
+- Only role 3 and role 5 can submit the POINTING popup, and only when the document is currently POINTING.
+
+User-task dashboard layout and performance update - 2026-08-06:
+- Apply the same dashboard usability behavior from task/dashboard to user-task/dashboard.
+- User-task sidebar/navbar should center the logo, move logout to the bottom of the sidebar, and support desktop collapse/expand with the collapsed state remembered after refresh.
+- Desktop user-task dashboard should not scroll the whole page. The left sidebar stays fixed, the top action area and filter bar stay fixed, only the table area scrolls, pagination stays at the bottom of the table panel, and the table header is sticky inside the table scroll area.
+- User-task auto-reload checkbox should remember checked/unchecked after refresh and reset to checked on each new day.
+- When user-task pagination or the POINTING popup turns auto reload off, save that unchecked state so refresh does not turn it back on.
+- On first page load, start auto reload only when the remembered value is checked.
+- Validate date inputs before applying date filters, so invalid browser date values do not fall back to today silently.
+- Optimize `/user-task/dashboard/data` like task/dashboard normal flow: query parent entries from `beta_enter` first for normal listing/count/page, and join `beta_enter_detail` only when loading details for selected page entry IDs or when detail filters `plate_number`, `d_name`, or `p_import` are used.
+- Keep user-task page size at 20 per page unless a future request changes it.
+- Production reminder: if Blade throws `Route [user-task.dashboard.pointing] not defined`, ensure production `routes/web.php` includes `user-task.dashboard.pointing` and `user-task.dashboard.subjects`, then run route/view/cache clear commands.

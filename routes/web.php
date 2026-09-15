@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EnterController;
 use App\Http\Controllers\SeeController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\DailyVehicleReportController;
+use App\Http\Controllers\DailyVehicleStatisticsReportController;
 use App\Http\Controllers\AddController;
 use App\Http\Controllers\Sandbox;
 use App\Http\Controllers\QuotarCon;
@@ -19,6 +21,12 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CancelValueController; 
 use App\Http\Controllers\MarkDownController;
 use App\Http\Controllers\RemarkController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserTaskController;
+use App\Http\Controllers\SeePrintPreviewController;
+use App\Http\Controllers\OldEnterController;
+use App\Http\Controllers\OldUserTaskV2Controller;
+use App\Http\Controllers\QuickEnterTestController;
 use Carbon\Carbon;
 
 session();
@@ -35,6 +43,67 @@ session();
  
 Route::get('/', function () {
     return redirect()->route('login'); 
+});
+
+Route::get('/quick-enter-test', [QuickEnterTestController::class, 'index'])->name('quick-enter-test.index');
+Route::post('/quick-enter-test/old', [QuickEnterTestController::class, 'createOld'])->name('quick-enter-test.old');
+Route::post('/quick-enter-test/role/{role}', [QuickEnterTestController::class, 'setUserRole'])->name('quick-enter-test.role');
+
+Route::get('/task/login', [TaskController::class, 'login'])->name('task.login');
+Route::post('/task/login', [TaskController::class, 'loginStore'])->name('task.login.store');
+Route::post('/task/logout', [TaskController::class, 'logout'])->name('task.logout');
+Route::middleware('task.auth')->group(function () {
+    Route::get('/task/dashboard', [TaskController::class, 'dashboard'])->name('task.dashboard');
+    Route::get('/task/dashboard/data', [TaskController::class, 'data'])->name('task.dashboard.data');
+});
+
+Route::get('/user-task/login', [UserTaskController::class, 'login'])->name('user-task.login');
+Route::post('/user-task/login', [UserTaskController::class, 'loginStore'])->name('user-task.login.store');
+Route::post('/user-task/logout', [UserTaskController::class, 'logout'])->name('user-task.logout');
+Route::middleware('user-task.auth')->group(function () {
+    Route::get('/user-task/dashboard', [UserTaskController::class, 'dashboard'])->name('user-task.dashboard');
+    Route::get('/user-task/dashboard/data', [UserTaskController::class, 'data'])->name('user-task.dashboard.data');
+    Route::post('/user-task/dashboard/action', [UserTaskController::class, 'action'])->name('user-task.dashboard.action');
+    Route::post('/user-task/dashboard/pointing', [UserTaskController::class, 'pointing'])->name('user-task.dashboard.pointing');
+    Route::post('/user-task/dashboard/subjects', [UserTaskController::class, 'subjects'])->name('user-task.dashboard.subjects');
+    Route::get('/seeprint-preview/{id}', [SeePrintPreviewController::class, 'show'])->name('seeprint.preview');
+});
+
+Route::get('/old-enter/login', [OldEnterController::class, 'login'])->name('old-enter.login');
+Route::post('/old-enter/login', [OldEnterController::class, 'loginStore'])->name('old-enter.login.store');
+Route::post('/old-enter/register', [OldEnterController::class, 'registerStore'])->name('old-enter.register.store');
+Route::post('/old-enter/logout', [OldEnterController::class, 'logout'])->name('old-enter.logout');
+Route::middleware('old-enter.auth')->group(function () {
+    Route::get('/old-enter', [OldEnterController::class, 'index'])->name('old-enter.index');
+    Route::get('/old-enter/documents', [OldEnterController::class, 'documents'])->name('old-enter.documents');
+    Route::get('/old-enter/documents/data', [OldEnterController::class, 'documentsData'])->name('old-enter.documents.data');
+    Route::get('/old-enter/quotars', [OldEnterController::class, 'quotars'])->name('old-enter.quotars');
+    Route::get('/old-enter/quotars/options', [OldEnterController::class, 'quotarOptions'])->name('old-enter.quotars.options');
+    Route::post('/old-enter/quotars/store', [OldEnterController::class, 'quotarsStore'])->name('old-enter.quotars.store');
+    Route::post('/old-enter/store', [OldEnterController::class, 'store'])->name('old-enter.store');
+    Route::post('/old-enter/draft', [OldEnterController::class, 'draft'])->name('old-enter.draft');
+    Route::post('/old-enter/send', [OldEnterController::class, 'send'])->name('old-enter.send');
+    Route::post('/old-enter/cancel', [OldEnterController::class, 'cancel'])->name('old-enter.cancel');
+    Route::post('/old-enter/delete', [OldEnterController::class, 'delete'])->name('old-enter.delete');
+});
+
+Route::get('/old-user-task-v2/login', [OldUserTaskV2Controller::class, 'login'])->name('old-user-task-v2.login');
+Route::post('/old-user-task-v2/login', [OldUserTaskV2Controller::class, 'loginStore'])->name('old-user-task-v2.login.store');
+Route::post('/old-user-task-v2/logout', [OldUserTaskV2Controller::class, 'logout'])->name('old-user-task-v2.logout');
+Route::get('/old-user-task-v2', function () {
+    return session('old_user_task_v2_user_id')
+        ? redirect()->route('old-user-task-v2.dashboard')
+        : redirect()->route('old-user-task-v2.login');
+})->name('old-user-task-v2.home');
+Route::middleware('old-user-task-v2.auth')->group(function () {
+    Route::get('/old-user-task-v2/dashboard', [OldUserTaskV2Controller::class, 'dashboard'])->name('old-user-task-v2.dashboard');
+    Route::get('/old-user-task-v2/dashboard/data', [OldUserTaskV2Controller::class, 'data'])->name('old-user-task-v2.dashboard.data');
+    Route::post('/old-user-task-v2/dashboard/action', [OldUserTaskV2Controller::class, 'action'])->name('old-user-task-v2.dashboard.action');
+    Route::post('/old-user-task-v2/dashboard/pointing', [OldUserTaskV2Controller::class, 'pointing'])->name('old-user-task-v2.dashboard.pointing');
+    Route::post('/old-user-task-v2/dashboard/subjects', [OldUserTaskV2Controller::class, 'subjects'])->name('old-user-task-v2.dashboard.subjects');
+    Route::post('/old-user-task-v2/dashboard/sign-mode', [OldUserTaskV2Controller::class, 'signMode'])->name('old-user-task-v2.dashboard.sign-mode');
+    Route::post('/old-user-task-v2/dashboard/file-opened', [OldUserTaskV2Controller::class, 'fileOpened'])->name('old-user-task-v2.dashboard.file-opened');
+    Route::get('/old-user-task-v2/print/{id}', [OldUserTaskV2Controller::class, 'print'])->name('old-user-task-v2.print');
 });
 
 
@@ -278,6 +347,11 @@ Route::post('/company-profile/store', [EnterController::class, 'store_company_pr
 
         
     Route::get('/report/index',[ReportController::class, 'index'])->name('ReportIndex')->middleware('checknormal');
+    Route::get('/reports/daily-vehicle',[DailyVehicleReportController::class, 'index'])->name('reports.daily-vehicle.index')->middleware('checknormal');
+    Route::get('/reports/daily-vehicle-test/{start}/{end}',[DailyVehicleReportController::class, 'legacyRange'])->name('reports.daily-vehicle.legacy')->middleware('checknormal');
+    Route::get('/reports/daily-vehicle-success/{start}/{end}',[DailyVehicleReportController::class, 'successRange'])->name('reports.daily-vehicle.success')->middleware('checknormal');
+    Route::get('/reports/daily-vehicle-statistics/{start}/{end}',[DailyVehicleStatisticsReportController::class, 'daily'])->name('reports.daily-vehicle.statistics')->middleware('checknormal');
+    Route::get('/reports/daily-vehicle-statistics-sync/{start}/{end}',[DailyVehicleStatisticsReportController::class, 'sync'])->name('reports.daily-vehicle.statistics.sync')->middleware('checknormal');
     Route::get('/report/{start}/{end}',[ReportController::class, 'daily'])->middleware('checknormal');
     Route::get('/i/report/{start}/{end}',[ReportController::class, 'daily_testing'])->middleware('checknormal');
     Route::get('/report/{start}/{end}/itue/wqiu/tieowq/igdsa/{limit}/90',[ReportController::class, 'dailycs'])->middleware('checknormal');
@@ -295,6 +369,7 @@ Route::post('/company-profile/store', [EnterController::class, 'store_company_pr
     Route::post('/sand/set/form',      [Sandbox::class, 'sandbox_set_form']); 
     
     Route::get('/view/quotar',      [QuotarCon::class, 'index'])->name('view.quotar')->middleware('checknormal'); 
+    Route::get('/view/quotar/export',      [QuotarCon::class, 'exportProducts'])->name('view.quotar.export')->middleware('checknormal'); 
     Route::post('/save/quotar',      [QuotarCon::class, 'save'])->name('com.save.quatar')->middleware('checknormal'); 
     Route::post('/edit/quotar',      [QuotarCon::class, 'edit'])->name('com.edit.quatar')->middleware('checknormal'); 
     Route::delete('/delete/quotar',      [QuotarCon::class, 'delete'])->name('com.delete.quatar')->middleware('checknormal'); 
@@ -405,5 +480,3 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('test/core-work')->name(
     Route::post('/update-paper', [\App\Http\Controllers\CoreTestingController::class, 'updatePaper'])->name('update-paper');
 
 });
-
-

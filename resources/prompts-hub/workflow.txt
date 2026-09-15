@@ -1,0 +1,89 @@
+User-task current workflow reference - 2026-08-06
+
+Main status flow:
+WAITING -> POINTING -> SIGNING -> SIGNED -> READY -> SUCCESS
+
+Database status note:
+- UI label `SIGNED` is stored in `beta_enter.status` as `SIGNINED`.
+
+Default dashboard behavior:
+- `/user-task/dashboard` loads today's date range by default.
+- Each user sees only the statuses allowed for their `users.is_admin` role.
+- Default status list excludes `SUCCESS`; users who are allowed to see `SUCCESS` can choose it from the status dropdown.
+- `users.is_admin` is refreshed from the database on authenticated user-task requests so manual role changes can be tested without logout.
+
+Role 2 workflow:
+- Can see: WAITING, POINTING, READY, SUCCESS.
+- Default visible work excludes SUCCESS.
+- Can move WAITING -> POINTING.
+- Can pull POINTING -> WAITING.
+- Can move READY -> SUCCESS.
+- Can pull SUCCESS -> READY.
+
+Role 3 workflow:
+- Can see: POINTING, SIGNING, SIGNED(SIGNINED), READY.
+- Can move POINTING -> SIGNING by using the pointing popup.
+- Pointing popup requires beta_main_road, one or more beta_road_select roads, optional saved company subject, and note/details.
+- Pointing popup saves beta_enter_road_detail rows, beta_enter.main_road_id, beta_enter.feed_back_msg, and updates status to SIGNING.
+- Can pull SIGNING -> POINTING.
+- Can move SIGNED(SIGNINED) -> READY.
+- Can pull READY -> SIGNED(SIGNINED).
+- Can print documents when status is SIGNED(SIGNINED) or READY.
+
+Role 4 workflow:
+- Can see: SIGNING, SIGNED(SIGNINED), READY, SUCCESS.
+- Default visible work excludes SUCCESS.
+- Can move SIGNING -> SIGNED(SIGNINED).
+- Can pull SIGNED(SIGNINED) -> SIGNING.
+- Can move READY -> SUCCESS.
+- Can pull READY -> SIGNED(SIGNINED).
+- Can pull SUCCESS -> READY.
+
+Role 5 workflow:
+- Can see: WAITING, POINTING, SIGNING, SIGNED(SIGNINED), READY, SUCCESS.
+- Default visible work excludes SUCCESS.
+- Can move WAITING -> POINTING.
+- Can move POINTING -> SIGNING by using the pointing popup.
+- Can pull POINTING -> WAITING.
+- Can move SIGNING -> SIGNED(SIGNINED).
+- Can pull SIGNING -> POINTING.
+- Can move SIGNED(SIGNINED) -> READY.
+- Can pull SIGNED(SIGNINED) -> SIGNING.
+- Can move READY -> SUCCESS.
+- Can pull READY -> SIGNED(SIGNINED).
+- Can pull SUCCESS -> READY.
+- Can print documents when status is SIGNED(SIGNINED), READY, or SUCCESS.
+
+Old workflow reference from notallow/see/list:
+- The old page has a `ready` button/action that sends signed documents onward to READY.
+- In the new user-task dashboard, this SIGNED(SIGNINED) -> READY step is implemented for role 3 and role 5.
+
+Update - 2026-08-25
+
+New/old v2 task pages:
+- New task dashboard path: `/new-user-task-v2/dashboard`
+- Old task dashboard path: `/old-user-task-v2/dashboard`
+- Both use the same shared Blade layout: `resources/views/new-user-task-v2/dashboard.blade.php`.
+- New task server logic uses `new_enters`.
+- Old task server logic uses `beta_enter`.
+
+After-signed pull-back rule:
+- `is_admin = 2` and `is_admin = 3` cannot pull back after a document is signed.
+- `is_admin = 4` and `is_admin = 5` can pull back after signed.
+- Allowed after-signed pull-backs for role 4 and 5:
+  - SIGNINED -> SIGNING
+  - READY -> SIGNINED
+  - SUCCESS -> READY
+
+Signing mode:
+- Role 4 and role 5 can choose between:
+  - `ເຊັນເອງ`
+  - `ເຊັນລະບົບ`
+- Default is `ເຊັນລະບົບ`.
+- The selection is stored in session and should remain until logout.
+- This applies to `/new-user-task-v2` and `/old-user-task-v2`.
+
+Production caution:
+- Old production `/enter` still matters during the move to the new version.
+- Avoid broad refactors in `EnterController`.
+- Important hotfix: because `beta_enter` primary key is `enter_id`, old create/draft paths must use `$beta_enter->enter_id`, not `$beta_enter->id`, before inserting `beta_enter_file` rows.

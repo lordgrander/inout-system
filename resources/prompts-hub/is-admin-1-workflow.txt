@@ -1,0 +1,235 @@
+is_admin = 1 user workflow reference - 2026-08-24
+
+Purpose:
+- This note explains how I see the current `is_admin = 1` flow from the beginning.
+- `is_admin = 1` is the normal company/user submission role.
+- This role is different from `/user-task`; `/user-task/login` blocks `is_admin = 1`.
+
+Entry route:
+- Normal Laravel login sends the user to `/dashboard`.
+- In `routes/web.php`, `/dashboard` redirects `is_admin = 1` to route `Enter`.
+- Route `Enter` is `GET /enter/`.
+- Controller method: `EnterController@index`.
+- Main Blade: `resources/views/allow/enter/index.blade.php`.
+
+Navbar links for `is_admin = 1`:
+- `Enter`: new vehicle permit form.
+- `tell_car_insurance.create`: tell car insurance form.
+- `EnterList`: today's submitted/cancel/draft list.
+- `EnterQuotar`: quota/quotar entry flow.
+- `quotar.history`: quota history.
+- `see.quotar`: quota status/list.
+- `EnterHistoryList`: older/history list.
+
+Main new permit form:
+- Page loads vehicle type options from `beta_t_type`.
+- The controller loads the user's company by `users.com_id` from `beta_company_group`.
+- The company status is saved in session as:
+  - `com_id`
+  - `com_status`
+
+Top vehicle inputs:
+- `#plate`: vehicle plate number.
+- `#d_name`: driver name.
+- `#weight`: weight. The browser formats commas and blocks non-number characters except comma/dot.
+- `#t_model`: vehicle type select from `beta_t_type`.
+- `#tell_round`: round/trip count select, values 1 to 5.
+- `#p_import`: import product/name.
+- `#detail`: import product document/reference number.
+
+Vehicle type / round behavior:
+- `#t_model` options have `data-round`.
+- If selected type has `data-round = 1`, the round selector is shown.
+- If selected type does not have `data-round = 1`, the round selector is hidden and reset to 1.
+- The first option is hard-set in Blade as vehicle type id `19` with `data-round = 1`.
+
+Add vehicle row:
+- Button `#add` validates all top vehicle inputs.
+- Required before adding:
+  - plate number
+  - driver name
+  - vehicle type
+  - import product
+  - weight
+  - import document/reference number
+- Maximum rows on the current form is 5 active vehicle rows.
+- Added rows are rendered into table body `#build`.
+- Each row has display fields and hidden/editable form fields:
+  - `input_plate_{index}`
+  - `input_d_name_{index}`
+  - `input_t_model_{index}`
+  - `input_t_model_round_{index}` when round is enabled
+  - `input_p_import_{index}`
+  - `input_weight_{index}`
+  - `input_detail_{index}`
+- Row actions:
+  - edit: hides display row and shows input row.
+  - save edit: validates row fields and copies input values back to display row.
+  - cancel edit: restores previous values.
+  - delete: sets `input_plate_{index}` to `this_delete`, clears the row inputs, hides both row views, and reduces the visible row count.
+
+Destination/file inputs:
+- `#address` / `name="address"`: destination village.
+- `#district` / `name="district"`: destination district.
+- `#province` / `name="province"`: destination province.
+- `#lasttails` / `name="lasttails"`: optional special destination note.
+- `#upload_files` / `name="upload_files[]"`: multiple file upload.
+- `#index` / `name="index"`: hidden field storing the latest row index.
+
+Session remembered fields:
+- The form saves these inputs live by POST `/enter/update-session`:
+  - `address`
+  - `district`
+  - `province`
+  - `p_import`
+  - `detail`
+- The Blade fills these fields from old input or session where available.
+- `EnterController@updatesession` stores the field by its input name.
+
+Submit as WAITING:
+- Button `#save` posts the form by AJAX to `/enter/save`.
+- Route name uses `EnterSave`, but multiple routes share that name in `routes/web.php`.
+- The UI requires at least one vehicle row and destination address/district/province before submit.
+- `EnterController@store` creates one `beta_enter` parent row:
+  - `user_id = Auth::user()->id`
+  - `com_id = users.com_id`
+  - `enter_number = "0"`
+  - `sign_status = "0"`
+  - `date_make = now Asia/Bangkok`
+  - `date_in = now Asia/Bangkok`
+  - `date_out = now + 2 days`
+  - `status = WAITING`
+  - `price = "0"`
+  - `lasttails = request lasttails`
+  - `slug = random 50 characters`
+  - `address`, `district`, `province` sanitized by regex
+- For each row from 1 to `index`, if `input_plate_{i}` is not `this_delete`, it creates a `beta_enter_detail` child row:
+  - `enter_id`
+  - `user_id`
+  - `plate_number`
+  - `t_model`
+  - `d_name`
+  - `p_import`
+  - `rounds`
+  - `weight`
+  - `detail`
+  - `status = 0`
+  - `t_type_id = 0`
+  - `p_type_id = 0`
+  - `is_verify = YES/NO`
+- `is_verify` is set by checking `beta_watching_list` for the numeric part of the plate within the last 7 days.
+- Files are stored under `public/com/c{com_id}/in{enter_id}` through disk `my_files`.
+- Each uploaded file creates a `beta_enter_file` row:
+  - `user_id`
+  - `date`
+  - `file_url`
+  - `enter_id`
+- If some file upload fails, a `beta_feed_back` row is written with pointer `Enter`.
+- Success response is JSON `{ status: 200, message: ... }`, and the page reloads.
+
+Save as DRAFT:
+- Button `#draft` posts the same form by AJAX to `/enter/draft`.
+- It requires at least one vehicle row and destination address/district/province.
+- `EnterController@draft` creates the same parent/detail/file structure as submit, but parent `beta_enter.status = DRAFT`.
+- Draft rows appear in the user's list and can be edited, sent, or deleted.
+
+User list:
+- Route `GET /enter/list`, name `EnterList`.
+- Controller method: `EnterController@list`.
+- Blade: `resources/views/allow/enter/list.blade.php`.
+- The list only shows entries for the logged-in user's company/user.
+- Main submitted list:
+  - today's rows
+  - `status NOT IN (CANCEL, DRAFT)`
+  - ordered latest first
+  - limited to 50
+- Cancel list:
+  - today's rows with `status = CANCEL`
+- Draft list:
+  - rows with `status = DRAFT`
+  - latest first
+  - limited to 50
+- Files are shown by `beta_enter_file` and download through `/download-file/{file}`.
+
+List actions:
+- Active `WAITING` rows show cancel button.
+- Cancel action posts `/enter/cancel`.
+- `EnterController@cancel` only allows cancel when current status is `WAITING`.
+- Cancel sets:
+  - `status = CANCEL`
+  - `sign_url = ""`
+  - `cancel_log = "user cancelled" in Lao UI text
+  - feedback pointer `User & Cancel`
+- Draft rows show:
+  - send document button
+  - edit link
+  - delete button
+- Send draft posts `/enter/send` and changes:
+  - `status = WAITING`
+  - `date_make = now Asia/Bangkok`
+  - `date_in = now Asia/Bangkok`
+- Delete posts `/enter/delete`.
+- Delete removes:
+  - `beta_enter`
+  - `beta_enter_detail`
+  - `beta_enter_road_detail`
+  - `beta_enter_file` rows and physical files
+  - writes feedback pointer `User & Cancel`
+
+Edit existing entry:
+- Route `GET /enter/update/{id}` loads `EnterController@update`.
+- Only entries owned by the logged-in user can be loaded.
+- Edit is allowed only when the current status is `CANCEL` or `DRAFT`.
+- Blade: `resources/views/allow/enter/update.blade.php`.
+- Update submit posts `/enter/update/store/{id}`:
+  - deletes existing detail rows for this enter/user.
+  - updates parent to `status = WAITING`.
+  - refreshes `date_make`, `date_in`, and `date_out`.
+  - recreates detail rows from the current dynamic table.
+  - adds newly uploaded files.
+- Update draft posts `/enter/update/draft/{id}`:
+  - deletes existing detail rows for this enter/user.
+  - updates parent to `status = DRAFT`.
+  - recreates detail rows and adds newly uploaded files.
+- File delete inside edit posts `/enter/update/file/drop` and removes the selected `beta_enter_file` row and physical file.
+
+View/progress:
+- Route `GET /enter/list/view/{id}` loads `EnterController@view`.
+- The view only loads entries for the logged-in user and company.
+- It loads `beta_enter` parent and `beta_enter_detail` joined to `beta_t_type`.
+- Progress labels are based on `beta_enter.status`:
+  - `WAITING` or `QWAIT`: waiting, 20%.
+  - `POINTING`: route selection in progress, 50%.
+  - `SIGNING` or `QSIGNING`: processing/signing, 70%.
+  - `SIGNINED`: processing, 80%.
+  - `READY`: processing/waiting handoff, 90%.
+  - `SUCCESS`: complete, 100%, green.
+  - `CANCEL`: cancelled, 100%, red.
+
+Status flow from the is_admin = 1 user's point of view:
+- New submit starts at `WAITING`.
+- Draft stays `DRAFT` until the user sends it.
+- A user can cancel only while it is `WAITING`.
+- After `WAITING`, staff roles move it through:
+  - `POINTING`
+  - `SIGNING`
+  - `SIGNINED` (UI label usually means SIGNED)
+  - `READY`
+  - `SUCCESS`
+- The `is_admin = 1` user mostly watches progress after submission; they do not control the staff workflow steps.
+
+Important differences from user-task:
+- `/user-task/login` rejects `is_admin = 1`.
+- `is_admin = 1` uses normal Laravel auth routes and `auth:sanctum, verified`.
+- `is_admin = 1` does not use `/user-task/dashboard`.
+- `is_admin = 1` creates documents; roles 2, 3, 4, and 5 process documents.
+
+Implementation notes / things to watch:
+- `routes/web.php` has several routes named `EnterSave`; be careful when relying on route names for save/draft/send.
+- The UI text says file uploads are limited to 15MB on the new form, but controller limits differ by method:
+  - `store`: `File::size($pdfFile) < 20097152`
+  - `draft`: `File::size($pdfFile) < 2097152`
+  - `updatestore` and `updatedraft`: `File::size($pdfFile) < 15242880`
+- Comments around those limits sometimes still say `2MB`; trust the numeric checks when debugging current behavior.
+- The parent table uses `enter_id` in queries, but the Eloquent create reads `$beta_enter->id` after save. Confirm model primary key behavior before changing this area.
+- Do not confuse this normal entry flow with `new-enter` or `task/dashboard`; they are separate routes/controllers.

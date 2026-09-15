@@ -10,6 +10,7 @@ class beta_enter extends Model
     use HasFactory;
     public $table = 'beta_enter';
     public $timestamps = false;
+    protected $primaryKey = 'enter_id';
 
     protected $fillable = [
         'enter_id',
@@ -37,9 +38,12 @@ class beta_enter extends Model
         'district',
         'province',
         'mark',
+        'feed_back_msg',
         'main_road_id',
         'cancel_log',
-        'enter_type'
+        'enter_type',
+        'take',
+        'expired_at',
     ]; 
 
     public function enterHaveDetail()
